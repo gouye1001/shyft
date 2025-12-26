@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ScrollReveal from '../components/ScrollReveal';
 
 const Pricing: React.FC = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            containerRef.current.style.setProperty('--mouse-x', `${x}px`);
+            containerRef.current.style.setProperty('--mouse-y', `${y}px`);
+        }
+    };
 
     const getPrice = (monthlyPrice: number) => {
         if (billingCycle === 'annual') {
@@ -57,182 +68,211 @@ const Pricing: React.FC = () => {
     ];
 
     return (
-        <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
-            <ScrollReveal>
-                <div className="text-center mb-12">
-                    <h1 className="text-5xl font-semibold text-white tracking-tight mb-6">Plans for every stage.</h1>
-                    <p className="text-xl text-zinc-400 mb-8">Transparent pricing. No contracts.</p>
-
-                    {/* Billing Toggle */}
-                    <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-zinc-900/50 border border-white/10">
-                        <button
-                            onClick={() => setBillingCycle('monthly')}
-                            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${billingCycle === 'monthly'
-                                    ? 'bg-white text-black'
-                                    : 'text-zinc-400 hover:text-white'
-                                }`}
-                        >
-                            Monthly
-                        </button>
-                        <button
-                            onClick={() => setBillingCycle('annual')}
-                            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all relative ${billingCycle === 'annual'
-                                    ? 'bg-white text-black'
-                                    : 'text-zinc-400 hover:text-white'
-                                }`}
-                        >
-                            Annual
-                            <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                Save 20%
-                            </span>
-                        </button>
-                    </div>
-                </div>
-            </ScrollReveal>
-
-            {/* Pricing Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
-                {plans.map((plan, index) => (
-                    <ScrollReveal key={plan.name} delay={`${index * 100}`}>
-                        <div className={`
-                            relative p-8 rounded-3xl transition-all duration-300
-                            ${plan.popular
-                                ? 'bg-blue-900/10 border-2 border-blue-500/30 shadow-lg shadow-blue-500/10'
-                                : 'bg-zinc-900/30 border border-white/10 hover:border-white/20'
-                            }
-                        `}>
-                            {plan.popular && (
-                                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-t-3xl"></div>
-                            )}
-                            {plan.popular && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">
-                                    Most Popular
-                                </div>
-                            )}
-                            <h3 className="text-white font-medium mb-2">{plan.name}</h3>
-                            <div className="text-4xl font-bold text-white mb-2">
-                                {plan.price === null ? (
-                                    'Custom'
-                                ) : plan.price === 0 ? (
-                                    '$0'
-                                ) : (
-                                    <>
-                                        ${getPrice(plan.price)}
-                                        {billingCycle === 'annual' && plan.price > 0 && (
-                                            <span className="text-lg text-zinc-500 font-normal line-through ml-2">
-                                                ${plan.price}
-                                            </span>
-                                        )}
-                                    </>
-                                )}
-                                <span className="text-lg text-zinc-500 font-normal">{plan.period}</span>
-                            </div>
-                            {billingCycle === 'annual' && plan.price && plan.price > 0 && (
-                                <div className="text-sm text-emerald-400 mb-4">
-                                    Save ${(plan.price - getPrice(plan.price)) * 12}/year
-                                </div>
-                            )}
-                            <p className="text-sm text-zinc-500 mb-6">{plan.description}</p>
-                            <button className={`
-                                w-full py-3 rounded-full font-medium transition-all mb-8
-                                ${plan.popular
-                                    ? 'bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/20'
-                                    : 'border border-white/20 text-white hover:bg-white hover:text-black'
-                                }
-                            `}>
-                                {plan.cta}
-                            </button>
-                            <ul className="space-y-3">
-                                {plan.features.map((feature, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-sm text-zinc-400">
-                                        <i className={`fa-solid fa-check mt-0.5 ${plan.popular ? 'text-blue-400' : 'text-emerald-400'}`} />
-                                        <span>{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </ScrollReveal>
-                ))}
+        <div
+            className="cinematic-bg min-h-screen pt-32 pb-20 px-6 relative overflow-hidden"
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+        >
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px] animate-pulse-slow" />
+                <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px]" />
             </div>
 
-            {/* Comparison Table */}
-            <ScrollReveal>
-                <div className="border-t border-white/10 pt-16">
-                    <h3 className="text-3xl font-semibold text-white mb-12 text-center">Compare all features</h3>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-white/10">
-                                    <th className="py-4 pr-4 text-zinc-500 font-medium w-1/2">Features</th>
-                                    <th className="py-4 px-4 text-white font-medium text-center w-1/6">Starter</th>
-                                    <th className="py-4 px-4 text-blue-400 font-medium text-center w-1/6">Pro</th>
-                                    <th className="py-4 pl-4 text-white font-medium text-center w-1/6">Enterprise</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-zinc-400">
-                                {comparisonFeatures.map((feature, index) => (
-                                    <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                        <td className="py-4 pr-4">{feature.name}</td>
-                                        <td className="py-4 px-4 text-center">
-                                            {typeof feature.starter === 'boolean' ? (
-                                                feature.starter ? (
-                                                    <i className="fa-solid fa-check text-emerald-400" />
-                                                ) : (
-                                                    <span className="text-zinc-700">-</span>
-                                                )
-                                            ) : (
-                                                <span className="text-white">{feature.starter}</span>
-                                            )}
-                                        </td>
-                                        <td className="py-4 px-4 text-center">
-                                            {typeof feature.pro === 'boolean' ? (
-                                                feature.pro ? (
-                                                    <i className="fa-solid fa-check text-blue-400" />
-                                                ) : (
-                                                    <span className="text-zinc-700">-</span>
-                                                )
-                                            ) : (
-                                                <span className="text-white">{feature.pro}</span>
-                                            )}
-                                        </td>
-                                        <td className="py-4 pl-4 text-center">
-                                            {typeof feature.enterprise === 'boolean' ? (
-                                                feature.enterprise ? (
-                                                    <i className="fa-solid fa-check text-emerald-400" />
-                                                ) : (
-                                                    <span className="text-zinc-700">-</span>
-                                                )
-                                            ) : (
-                                                <span className="text-white">{feature.enterprise}</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </ScrollReveal>
+            <div className="max-w-7xl mx-auto relative z-10">
+                <ScrollReveal>
+                    <div className="text-center mb-16">
+                        <p className="text-sm text-zinc-500 uppercase tracking-widest mb-4">
+                            Ready to transform your operations?
+                        </p>
+                        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-8">
+                            Plans for every stage.
+                        </h1>
+                        <p className="text-xl text-zinc-300 mb-10 max-w-2xl mx-auto">
+                            Transparent pricing. No hidden fees. No contracts.
+                        </p>
 
-            {/* FAQ Section */}
-            <ScrollReveal>
-                <div className="mt-32">
-                    <h3 className="text-3xl font-semibold text-white mb-12 text-center">Frequently asked questions</h3>
-                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        {[
-                            { q: 'Can I change plans anytime?', a: 'Yes! Upgrade or downgrade your plan at any time. Changes take effect immediately.' },
-                            { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, ACH transfers, and can invoice for annual contracts.' },
-                            { q: 'Is there a free trial?', a: 'Yes! Try Pro features free for 14 days. No credit card required.' },
-                            { q: 'Do you offer discounts for nonprofits?', a: 'Yes, we offer special pricing for registered nonprofits. Contact sales for details.' }
-                        ].map((faq, i) => (
-                            <div key={i} className="p-6 rounded-2xl bg-zinc-900/30 border border-white/10">
-                                <h4 className="text-white font-medium mb-2">{faq.q}</h4>
-                                <p className="text-zinc-400 text-sm">{faq.a}</p>
-                            </div>
-                        ))}
+                        {/* Billing Toggle */}
+                        <div className="inline-flex items-center gap-2 p-1.5 rounded-full bg-zinc-900/50 border border-white/10 backdrop-blur-md">
+                            <button
+                                onClick={() => setBillingCycle('monthly')}
+                                className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${billingCycle === 'monthly'
+                                    ? 'bg-white text-black shadow-lg shadow-white/10'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                Monthly
+                            </button>
+                            <button
+                                onClick={() => setBillingCycle('annual')}
+                                className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all relative ${billingCycle === 'annual'
+                                    ? 'bg-white text-black shadow-lg shadow-white/10'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                Annual
+                                <span className="absolute -top-3 -right-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg border border-white/20">
+                                    Save 20%
+                                </span>
+                            </button>
+                        </div>
                     </div>
+                </ScrollReveal>
+
+                {/* Pricing Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 items-start">
+                    {plans.map((plan, index) => (
+                        <ScrollReveal key={plan.name} delay={`${index * 100}`}>
+                            <div className={`
+                                card-spotlight relative p-8 rounded-[2rem] transition-all duration-300 backdrop-blur-xl h-full flex flex-col border
+                                ${plan.popular
+                                    ? 'bg-zinc-900/40 border-white/10 ring-1 ring-white/5 shadow-xl'
+                                    : 'bg-zinc-950/30 border-white/5 hover:border-white/10'
+                                }
+                            `}>
+                                {plan.popular && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-white/10 backdrop-blur-md text-white text-xs font-medium uppercase tracking-wider rounded-full border border-white/10">
+                                        Popular
+                                    </div>
+                                )}
+                                <div className="mb-8">
+                                    <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                                    <p className="text-sm text-zinc-400 font-medium">{plan.description}</p>
+                                </div>
+
+                                <div className="text-4xl font-bold text-white mb-2 tracking-tight">
+                                    {plan.price === null ? (
+                                        <span className="text-zinc-300">Custom</span>
+                                    ) : plan.price === 0 ? (
+                                        <span className="text-zinc-400 text-3xl font-semibold">Free</span>
+                                    ) : (
+                                        <>
+                                            ${getPrice(plan.price)}
+                                            {billingCycle === 'annual' && plan.price > 0 && (
+                                                <span className="text-xl text-zinc-500 font-normal line-through ml-3 decoration-zinc-600">
+                                                    ${plan.price}
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                    <span className="text-lg text-zinc-500 font-normal ml-1">{plan.period}</span>
+                                </div>
+                                {billingCycle === 'annual' && plan.price && plan.price > 0 && (
+                                    <div className="text-sm text-emerald-400 font-medium mb-8 bg-emerald-500/10 inline-block px-3 py-1 rounded-full border border-emerald-500/20">
+                                        Save ${(plan.price - getPrice(plan.price)) * 12}/year
+                                    </div>
+                                )}
+                                {!plan.price && <div className="mb-8 h-7" />}
+
+                                <div className="flex-grow">
+                                    <div className="h-px w-full bg-white/10 mb-8" />
+                                    <ul className="space-y-4 mb-8">
+                                        {plan.features.map((feature, i) => (
+                                            <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                                                <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${plan.popular ? 'bg-blue-500/20 text-blue-400' : 'bg-zinc-800 text-zinc-400'}`}>
+                                                    <i className="fa-solid fa-check text-xs" />
+                                                </div>
+                                                <span className="leading-tight">{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <button className={`
+                                    w-full py-4 rounded-xl font-bold transition-all text-sm uppercase tracking-wide
+                                    ${plan.popular
+                                        ? 'bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/20 hover:-translate-y-1'
+                                        : 'bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black hover:-translate-y-1'
+                                    }
+                                `}>
+                                    {plan.cta}
+                                </button>
+                            </div>
+                        </ScrollReveal>
+                    ))}
                 </div>
-            </ScrollReveal>
+
+                {/* Comparison Table */}
+                <ScrollReveal>
+                    <div className="card-spotlight rounded-[2.5rem] bg-zinc-900/30 border border-white/10 p-8 md:p-12 backdrop-blur-md overflow-hidden">
+                        <h3 className="text-3xl font-bold text-white mb-12 text-center tracking-tight">Compare features</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-white/10">
+                                        <th className="py-6 pr-4 text-zinc-400 font-medium w-1/2 uppercase text-xs tracking-wider">Features</th>
+                                        <th className="py-6 px-4 text-white font-bold text-center w-1/6">Starter</th>
+                                        <th className="py-6 px-4 text-blue-400 font-bold text-center w-1/6">Pro</th>
+                                        <th className="py-6 pl-4 text-white font-bold text-center w-1/6">Enterprise</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-zinc-300">
+                                    {comparisonFeatures.map((feature, index) => (
+                                        <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                                            <td className="py-5 pr-4 group-hover:text-white transition-colors">{feature.name}</td>
+                                            <td className="py-5 px-4 text-center">
+                                                {typeof feature.starter === 'boolean' ? (
+                                                    feature.starter ? (
+                                                        <i className="fa-solid fa-check text-emerald-400" />
+                                                    ) : (
+                                                        <span className="text-zinc-600">-</span>
+                                                    )
+                                                ) : (
+                                                    <span className="text-white font-medium">{feature.starter}</span>
+                                                )}
+                                            </td>
+                                            <td className="py-5 px-4 text-center bg-blue-500/5">
+                                                {typeof feature.pro === 'boolean' ? (
+                                                    feature.pro ? (
+                                                        <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
+                                                            <i className="fa-solid fa-check text-xs" />
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-zinc-600">-</span>
+                                                    )
+                                                ) : (
+                                                    <span className="text-blue-400 font-bold">{feature.pro}</span>
+                                                )}
+                                            </td>
+                                            <td className="py-5 pl-4 text-center">
+                                                {typeof feature.enterprise === 'boolean' ? (
+                                                    feature.enterprise ? (
+                                                        <i className="fa-solid fa-check text-emerald-400" />
+                                                    ) : (
+                                                        <span className="text-zinc-600">-</span>
+                                                    )
+                                                ) : (
+                                                    <span className="text-white font-medium">{feature.enterprise}</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </ScrollReveal>
+
+                {/* FAQ Section */}
+                <ScrollReveal>
+                    <div className="mt-32">
+                        <h3 className="text-3xl font-bold text-white mb-12 text-center tracking-tight">Frequently asked questions</h3>
+                        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                            {[
+                                { q: 'Can I change plans anytime?', a: 'Yes! Upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle.' },
+                                { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, ACH transfers, and can invoice for annual contracts.' },
+                                { q: 'Is there a free trial?', a: 'Yes! Try Pro features free for 14 days. No credit card required to start.' },
+                                { q: 'Do you offer discounts for nonprofits?', a: 'Yes, we offer special pricing for registered nonprofits. Contact sales for details.' }
+                            ].map((faq, i) => (
+                                <div key={i} className="card-spotlight p-8 rounded-3xl bg-zinc-900/30 border border-white/10 hover:border-white/20 transition-all">
+                                    <h4 className="text-white font-bold mb-3">{faq.q}</h4>
+                                    <p className="text-zinc-400 text-sm leading-relaxed">{faq.a}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollReveal>
+            </div>
         </div>
     );
 };

@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import ScrollReveal from '../components/ScrollReveal';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 const Terms: React.FC = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            containerRef.current.style.setProperty('--mouse-x', `${x}px`);
+            containerRef.current.style.setProperty('--mouse-y', `${y}px`);
+        }
+    };
+
     const sections = [
         {
             title: '1. Acceptance of Terms',
@@ -53,64 +65,79 @@ const Terms: React.FC = () => {
     ];
 
     return (
-        <div className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
-            {/* Breadcrumbs */}
-            <Breadcrumbs
-                items={[
-                    { label: 'Home' },
-                    { label: 'Terms of Service' }
-                ]}
-                className="mb-8"
-            />
-
-            {/* Header */}
-            <ScrollReveal>
-                <div className="mb-12">
-                    <h1 className="text-5xl font-semibold text-white mb-4">
-                        Terms of Service
-                    </h1>
-                    <p className="text-zinc-400">
-                        Last updated: December 26, 2025
-                    </p>
-                </div>
-            </ScrollReveal>
-
-            {/* Introduction */}
-            <ScrollReveal>
-                <div className="p-6 rounded-2xl bg-blue-900/10 border border-blue-500/30 mb-12">
-                    <p className="text-zinc-300 leading-relaxed">
-                        Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the Shyft platform. Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users, and others who access or use the Service.
-                    </p>
-                </div>
-            </ScrollReveal>
-
-            {/* Sections */}
-            <div className="space-y-8">
-                {sections.map((section, index) => (
-                    <ScrollReveal key={index} delay={`${index * 50}`}>
-                        <div className="pb-8 border-b border-white/10 last:border-0">
-                            <h2 className="text-2xl font-medium text-white mb-4">
-                                {section.title}
-                            </h2>
-                            <p className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                                {section.content}
-                            </p>
-                        </div>
-                    </ScrollReveal>
-                ))}
+        <div
+            className="cinematic-bg min-h-screen pt-32 pb-20 px-6 relative overflow-hidden"
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+        >
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px] animate-pulse-slow" />
+                <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px]" />
             </div>
 
-            {/* Footer CTA */}
-            <ScrollReveal>
-                <div className="mt-16 p-8 rounded-2xl bg-zinc-900/30 border border-white/10 text-center">
-                    <p className="text-zinc-400 mb-4">
-                        Have questions about our Terms of Service?
-                    </p>
-                    <button className="px-6 py-3 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all">
-                        Contact Legal Team
-                    </button>
+            <div className="max-w-4xl mx-auto relative z-10">
+                {/* Breadcrumbs */}
+                <Breadcrumbs
+                    items={[
+                        { label: 'Home' },
+                        { label: 'Terms of Service' }
+                    ]}
+                    className="mb-8"
+                />
+
+                {/* Header */}
+                <ScrollReveal>
+                    <div className="mb-12">
+                        <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
+                            Terms of Service
+                        </h1>
+                        <p className="text-zinc-400">
+                            Last updated: December 26, 2025
+                        </p>
+                    </div>
+                </ScrollReveal>
+
+                {/* Introduction */}
+                <ScrollReveal>
+                    <div className="card-spotlight p-8 rounded-3xl bg-zinc-900/30 border border-white/10 mb-12 backdrop-blur-md">
+                        <p className="text-zinc-300 leading-relaxed text-lg">
+                            Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the Shyft platform. Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users, and others who access or use the Service.
+                        </p>
+                    </div>
+                </ScrollReveal>
+
+                {/* Sections */}
+                <div className="space-y-8">
+                    {sections.map((section, index) => (
+                        <ScrollReveal key={index} delay={`${index * 50}`}>
+                            <div className="card-spotlight p-8 rounded-3xl bg-black/20 border border-white/5 hover:border-white/10 transition-all">
+                                <h2 className="text-2xl font-bold text-white mb-4">
+                                    {section.title}
+                                </h2>
+                                <p className="text-zinc-300 leading-relaxed whitespace-pre-line">
+                                    {section.content}
+                                </p>
+                            </div>
+                        </ScrollReveal>
+                    ))}
                 </div>
-            </ScrollReveal>
+
+                {/* Footer CTA */}
+                <ScrollReveal>
+                    <div className="mt-16 p-10 rounded-3xl bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10 text-center relative overflow-hidden card-spotlight">
+                        <div className="absolute inset-0 bg-blue-500/5" />
+                        <div className="relative z-10">
+                            <p className="text-zinc-300 mb-6 text-lg">
+                                Have questions about our Terms of Service?
+                            </p>
+                            <button className="px-8 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-all shadow-lg shadow-white/10 hover:shadow-white/20 hover:-translate-y-0.5">
+                                Contact Legal Team
+                            </button>
+                        </div>
+                    </div>
+                </ScrollReveal>
+            </div>
         </div>
     );
 };

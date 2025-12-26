@@ -21,8 +21,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
     if (variant === 'compact') {
         return (
-            <div className={`group p-6 rounded-2xl bg-zinc-900/30 border border-white/10 hover:border-white/20 transition-all duration-300 ${className}`}>
-                <div className="flex items-start gap-4">
+            <div className={`card-spotlight group p-6 rounded-2xl bg-zinc-900/30 border border-white/10 hover:bg-zinc-900/40 hover:border-white/20 transition-all duration-300 ${className}`}>
+                <div className="flex items-start gap-4 relative z-10">
                     <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/30 transition-colors">
                         <i className={`fa-solid ${icon} text-blue-400 text-xl`} />
                     </div>
@@ -38,7 +38,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
     return (
         <div
             className={`
-                group relative p-8 rounded-3xl border transition-all duration-300
+                card-spotlight group p-8 rounded-3xl border transition-all duration-300
                 ${variant === 'highlighted'
                     ? 'bg-blue-900/10 border-blue-500/30 hover:border-blue-500/50'
                     : 'bg-zinc-900/30 border-white/10 hover:border-white/20'
@@ -46,9 +46,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
                 ${className}
             `}
         >
-            {/* Hover glow effect */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-blue-500/10 to-transparent rounded-3xl pointer-events-none" />
-
             <div className="relative z-10">
                 {/* Icon */}
                 <div className={`
@@ -64,7 +61,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-semibold text-white mb-3">
+                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-blue-400 transition-colors">
                     {title}
                 </h3>
 

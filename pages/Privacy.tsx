@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import ScrollReveal from '../components/ScrollReveal';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 const Privacy: React.FC = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            containerRef.current.style.setProperty('--mouse-x', `${x}px`);
+            containerRef.current.style.setProperty('--mouse-y', `${y}px`);
+        }
+    };
+
     const sections = [
         {
             title: '1. Information We Collect',
@@ -82,92 +94,109 @@ Address: 123 Privacy Street, San Francisco, CA 94102`
     ];
 
     return (
-        <div className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
-            {/* Breadcrumbs */}
-            <Breadcrumbs
-                items={[
-                    { label: 'Home' },
-                    { label: 'Privacy Policy' }
-                ]}
-                className="mb-8"
-            />
-
-            {/* Header */}
-            <ScrollReveal>
-                <div className="mb-12">
-                    <h1 className="text-5xl font-semibold text-white mb-4">
-                        Privacy Policy
-                    </h1>
-                    <p className="text-zinc-400">
-                        Last updated: December 26, 2025
-                    </p>
-                </div>
-            </ScrollReveal>
-
-            {/* Introduction */}
-            <ScrollReveal>
-                <div className="p-6 rounded-2xl bg-emerald-900/10 border border-emerald-500/30 mb-12">
-                    <p className="text-zinc-300 leading-relaxed mb-4">
-                        At Shyft, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service.
-                    </p>
-                    <p className="text-zinc-300 leading-relaxed">
-                        Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Service.
-                    </p>
-                </div>
-            </ScrollReveal>
-
-            {/* Quick Summary */}
-            <ScrollReveal>
-                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/10 mb-12">
-                    <h3 className="text-xl font-medium text-white mb-4">Quick Summary</h3>
-                    <div className="grid md:grid-cols-3 gap-4">
-                        {[
-                            { icon: 'fa-shield-halved', title: 'Secure', desc: 'Your data is encrypted and protected' },
-                            { icon: 'fa-eye-slash', title: 'Private', desc: 'We never sell your data to third parties' },
-                            { icon: 'fa-hand-holding-heart', title: 'Transparent', desc: 'You control your information' }
-                        ].map((item, i) => (
-                            <div key={i} className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                                    <i className={`fa-solid ${item.icon} text-emerald-400`} />
-                                </div>
-                                <div>
-                                    <div className="text-white font-medium">{item.title}</div>
-                                    <div className="text-sm text-zinc-500">{item.desc}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </ScrollReveal>
-
-            {/* Sections */}
-            <div className="space-y-8">
-                {sections.map((section, index) => (
-                    <ScrollReveal key={index} delay={`${index * 30}`}>
-                        <div className="pb-8 border-b border-white/10 last:border-0">
-                            <h2 className="text-2xl font-medium text-white mb-4">
-                                {section.title}
-                            </h2>
-                            <p className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                                {section.content}
-                            </p>
-                        </div>
-                    </ScrollReveal>
-                ))}
+        <div
+            className="cinematic-bg min-h-screen pt-32 pb-20 px-6 relative overflow-hidden"
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+        >
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px] animate-pulse-slow" />
+                <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px]" />
             </div>
 
-            {/* Footer CTA */}
-            <ScrollReveal>
-                <div className="mt-16 p-8 rounded-2xl bg-zinc-900/30 border border-white/10 text-center">
-                    <i className="fa-solid fa-envelope text-3xl text-emerald-400 mb-4" />
-                    <p className="text-zinc-400 mb-4">
-                        Questions about how we handle your data?
-                    </p>
-                    <button className="px-6 py-3 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all">
-                        Contact Privacy Team
-                    </button>
+            <div className="max-w-4xl mx-auto relative z-10">
+                {/* Breadcrumbs */}
+                <Breadcrumbs
+                    items={[
+                        { label: 'Home' },
+                        { label: 'Privacy Policy' }
+                    ]}
+                    className="mb-8"
+                />
+
+                {/* Header */}
+                <ScrollReveal>
+                    <div className="mb-12">
+                        <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
+                            Privacy Policy
+                        </h1>
+                        <p className="text-zinc-400">
+                            Last updated: December 26, 2025
+                        </p>
+                    </div>
+                </ScrollReveal>
+
+                {/* Introduction */}
+                <ScrollReveal>
+                    <div className="card-spotlight p-8 rounded-3xl bg-zinc-900/30 border border-white/10 mb-12 backdrop-blur-md">
+                        <p className="text-zinc-300 leading-relaxed text-lg mb-6">
+                            At Shyft, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service.
+                        </p>
+                        <p className="text-zinc-300 leading-relaxed text-lg">
+                            Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Service.
+                        </p>
+                    </div>
+                </ScrollReveal>
+
+                {/* Quick Summary */}
+                <ScrollReveal>
+                    <div className="card-spotlight p-8 rounded-3xl bg-zinc-900/20 border border-white/5 mb-16">
+                        <h3 className="text-2xl font-bold text-white mb-8">Quick Summary</h3>
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {[
+                                { icon: 'fa-shield-halved', title: 'Secure', desc: 'Your data is encrypted and protected' },
+                                { icon: 'fa-eye-slash', title: 'Private', desc: 'We never sell your data to third parties' },
+                                { icon: 'fa-hand-holding-heart', title: 'Transparent', desc: 'You control your information at all times' }
+                            ].map((item, i) => (
+                                <div key={i} className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i className={`fa-solid ${item.icon} text-emerald-400 text-lg`} />
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-bold mb-1">{item.title}</div>
+                                        <div className="text-sm text-zinc-400">{item.desc}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollReveal>
+
+                {/* Sections */}
+                <div className="space-y-8">
+                    {sections.map((section, index) => (
+                        <ScrollReveal key={index} delay={`${index * 30}`}>
+                            <div className="card-spotlight p-8 rounded-3xl bg-black/20 border border-white/5 hover:border-white/10 transition-all">
+                                <h2 className="text-2xl font-bold text-white mb-4">
+                                    {section.title}
+                                </h2>
+                                <p className="text-zinc-300 leading-relaxed whitespace-pre-line">
+                                    {section.content}
+                                </p>
+                            </div>
+                        </ScrollReveal>
+                    ))}
                 </div>
-            </ScrollReveal>
+
+                {/* Footer CTA */}
+                <ScrollReveal>
+                    <div className="mt-16 p-10 rounded-3xl bg-gradient-to-br from-emerald-900/20 to-teal-900/20 border border-white/10 text-center relative overflow-hidden card-spotlight">
+                        <div className="absolute inset-0 bg-emerald-500/5" />
+                        <div className="relative z-10">
+                            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center mb-6 ring-1 ring-emerald-500/40">
+                                <i className="fa-solid fa-envelope text-3xl text-emerald-400" />
+                            </div>
+                            <p className="text-zinc-300 mb-8 text-lg">
+                                Questions about how we handle your data?
+                            </p>
+                            <button className="px-8 py-3 rounded-full bg-white text-black font-bold hover:bg-zinc-200 transition-all shadow-lg shadow-white/10 hover:shadow-white/20 hover:-translate-y-0.5">
+                                Contact Privacy Team
+                            </button>
+                        </div>
+                    </div>
+                </ScrollReveal>
+            </div>
         </div>
     );
 };

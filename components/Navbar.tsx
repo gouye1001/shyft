@@ -1,5 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { Page } from '../App';
+import Logo from './Logo';
 
 interface NavbarProps {
   currentPage: Page;
@@ -54,9 +55,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               onClick={() => onNavigate('home')}
               className="flex items-center gap-2 shrink-0 group"
             >
-              <div className="nav-logo relative rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-xs">S</span>
-              </div>
+              <Logo size="sm" className="group-hover:scale-110 transition-transform" />
               <span className="font-bold tracking-tight text-white text-sm md:text-base">
                 Shyft
               </span>

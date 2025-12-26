@@ -67,7 +67,7 @@ export default function App() {
 
   return (
     <AppProvider>
-      <div className="font-sans text-zinc-400 bg-black overflow-x-hidden min-h-screen flex flex-col noise-overlay">
+      <div className="font-sans text-zinc-300 bg-black overflow-x-hidden min-h-screen flex flex-col noise-overlay">
         {/* Toast Notifications */}
         <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
 

@@ -55,6 +55,7 @@ interface AnimatedCounterProps {
     prefix?: string;
     suffix?: string;
     className?: string;
+    decimals?: number;
 }
 
 export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
@@ -63,10 +64,14 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
     prefix = '',
     suffix = '',
     className = '',
+    decimals,
 }) => {
     const [displayValue, setDisplayValue] = useState(0);
     const ref = useRef<HTMLSpanElement>(null);
     const [hasAnimated, setHasAnimated] = useState(false);
+
+    // Determine decimal places if not provided
+    const targetDecimals = decimals ?? (Number.isInteger(value) ? 0 : value.toString().split('.')[1]?.length || 1);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -78,7 +83,7 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
                         const elapsed = Date.now() - startTime;
                         const progress = Math.min(elapsed / duration, 1);
                         const easeOut = 1 - Math.pow(1 - progress, 3);
-                        setDisplayValue(Math.floor(value * easeOut));
+                        setDisplayValue(value * easeOut);
                         if (progress < 1) requestAnimationFrame(animate);
                     };
                     requestAnimationFrame(animate);
@@ -93,7 +98,12 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
     return (
         <span ref={ref} className={className}>
-            {prefix}{displayValue.toLocaleString()}{suffix}
+            {prefix}
+            {displayValue.toLocaleString(undefined, {
+                minimumFractionDigits: targetDecimals,
+                maximumFractionDigits: targetDecimals,
+            })}
+            {suffix}
         </span>
     );
 };
