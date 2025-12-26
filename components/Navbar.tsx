@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Page } from '../App';
+import Logo from './Logo';
 
 interface NavbarProps {
   currentPage: Page;
@@ -11,67 +12,67 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 80);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Check initial state
+    handleScroll();
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on page change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [currentPage]);
 
   const navLinks = [
-    { label: 'Features', page: 'features' as Page },
+    { label: 'Product', page: 'features' as Page },
+    { label: 'Solutions', page: 'about' as Page },
     { label: 'Pricing', page: 'pricing' as Page },
-    { label: 'About', page: 'about' as Page },
-    { label: 'Contact', page: 'contact' as Page },
+    { label: 'Enterprise', page: 'contact' as Page },
   ];
-
-  const isActive = (page: Page) => currentPage === page;
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 pt-4 md:pt-5">
-        {/* Full-width background container */}
-        <div className="max-w-7xl mx-auto">
-          <div
-            className={`
-              relative flex items-center justify-between
-              transition-all duration-500 ease-out
-              ${isScrolled
-                ? 'bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 md:px-6 py-2.5 shadow-2xl shadow-black/50'
-                : 'bg-transparent px-2 py-3'
-              }
-            `}
+      <header className="fixed top-0 left-0 right-0 z-50 pt-4 md:pt-5 px-4 md:px-6">
+        <div className="flex justify-center">
+          {/* Floating Island - uses data-scrolled attribute for CSS transitions */}
+          <nav
+            className="floating-island"
+            data-scrolled={isScrolled ? "true" : "false"}
           >
             {/* Logo */}
-            <div
-              className="flex items-center gap-2.5 cursor-pointer group"
+            <button
               onClick={() => onNavigate('home')}
+              className="flex items-center gap-2 shrink-0 group"
             >
-              <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white font-bold text-sm">S</span>
-                <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <span className="font-bold tracking-tight text-white text-lg">
+              <Logo size="sm" className="group-hover:scale-110 transition-transform" />
+              <span className="font-bold tracking-tight text-white text-sm md:text-base">
                 Shyft
               </span>
-            </div>
+            </button>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            {/* Desktop Navigation - centered when not scrolled */}
+            <div className={`
+              hidden md:flex items-center gap-0.5
+              ${isScrolled ? '' : 'absolute left-1/2 -translate-x-1/2'}
+            `}>
               {navLinks.map((link) => (
                 <button
                   key={link.page}
                   onClick={() => onNavigate(link.page)}
                   className={`
-                    px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-                    ${isActive(link.page)
+                    nav-item rounded-full font-medium transition-colors duration-200
+                    ${currentPage === link.page
                       ? 'text-white bg-white/10'
                       : 'text-zinc-400 hover:text-white hover:bg-white/5'
                     }
@@ -86,19 +87,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             <div className="hidden md:flex items-center gap-2">
               <button
                 onClick={() => onNavigate('login')}
-                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                className="nav-item text-zinc-400 hover:text-white font-medium transition-all border border-transparent hover:border-white/10 rounded-full whitespace-nowrap"
               >
                 Log in
               </button>
               <button
                 onClick={() => onNavigate('signup')}
-                className={`
-                  text-sm font-semibold rounded-full transition-all duration-300
-                  ${isScrolled
-                    ? 'bg-white text-black px-4 py-2 hover:bg-zinc-200'
-                    : 'bg-white text-black px-5 py-2.5 hover:bg-zinc-200 shadow-lg shadow-white/10'
-                  }
-                `}
+                className="nav-cta bg-white text-black font-semibold rounded-full hover:bg-zinc-100 transition-colors whitespace-nowrap"
               >
                 Start Free
               </button>
@@ -112,33 +107,29 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             >
               <i className={`fa-solid ${isMobileMenuOpen ? 'fa-xmark' : 'fa-bars'} text-lg`} />
             </button>
-          </div>
+          </nav>
         </div>
-      </nav>
+      </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       <div
         className={`
-          fixed inset-0 z-40 md:hidden transition-all duration-300
-          ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+          fixed inset-0 z-40 md:hidden transition-opacity duration-300
+          ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
         `}
       >
-        {/* Backdrop */}
         <div
           className="absolute inset-0 bg-black/95 backdrop-blur-xl"
           onClick={() => setIsMobileMenuOpen(false)}
         />
-
-        {/* Menu Content */}
         <div className={`
           relative z-10 flex flex-col items-center justify-center h-full gap-6 px-6
-          transition-transform duration-300
-          ${isMobileMenuOpen ? 'translate-y-0' : '-translate-y-8'}
+          transition-all duration-400
+          ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'}
         `}>
-          {/* Close button */}
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white"
+            className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
           >
             <i className="fa-solid fa-xmark text-lg" />
           </button>
@@ -146,10 +137,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
           {navLinks.map((link, i) => (
             <button
               key={link.page}
-              onClick={() => onNavigate(link.page)}
+              onClick={() => { setIsMobileMenuOpen(false); onNavigate(link.page); }}
               className={`
                 text-2xl font-medium transition-all duration-300
-                ${isActive(link.page) ? 'text-white' : 'text-zinc-500 hover:text-white'}
+                ${currentPage === link.page ? 'text-white' : 'text-zinc-500 hover:text-white'}
               `}
               style={{ transitionDelay: `${i * 50}ms` }}
             >
@@ -160,13 +151,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
           <div className="w-16 h-px bg-white/10 my-4" />
 
           <button
-            onClick={() => onNavigate('login')}
+            onClick={() => { setIsMobileMenuOpen(false); onNavigate('login'); }}
             className="text-lg text-zinc-400 hover:text-white transition-colors"
           >
             Log in
           </button>
           <button
-            onClick={() => onNavigate('signup')}
+            onClick={() => { setIsMobileMenuOpen(false); onNavigate('signup'); }}
             className="px-8 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-colors"
           >
             Start Free Trial
@@ -177,4 +168,4 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);

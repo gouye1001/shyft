@@ -46,9 +46,9 @@ const FormInput: React.FC<FormInputProps> = ({
     border-2 transition-all duration-300 ease-out
     focus:outline-none
     ${error
-            ? 'border-red-500/50 focus:border-red-500 focus:shadow-[0_0_20px_-5px_rgba(239,68,68,0.3)]'
+            ? 'border-brand-danger/50 focus:border-brand-danger focus:shadow-[0_0_20px_-5px_rgba(229,72,77,0.3)]'
             : isFocused
-                ? 'border-blue-500/50 shadow-[0_0_30px_-10px_rgba(59,130,246,0.4)]'
+                ? 'border-brand-accent/50 shadow-[0_0_30px_-10px_rgba(91,91,214,0.4)]'
                 : 'border-white/10 hover:border-white/20'
         }
     ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
@@ -66,22 +66,22 @@ const FormInput: React.FC<FormInputProps> = ({
                         : 'top-3.5 text-sm'
                     }
           ${error
-                        ? 'text-red-400'
+                        ? 'text-brand-danger'
                         : isFocused
-                            ? 'text-blue-400'
+                            ? 'text-brand-accent-light'
                             : 'text-zinc-500'
                     }
         `}
             >
                 {label}
-                {required && <span className="text-red-400 ml-1">*</span>}
+                {required && <span className="text-brand-danger ml-1">*</span>}
             </label>
 
             {/* Focus Glow */}
             <div
                 className={`
           absolute inset-0 rounded-xl transition-opacity duration-300
-          bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20
+          bg-gradient-to-r from-brand-accent/20 via-brand-accent/10 to-brand-accent/20
           blur-xl -z-10
           ${isFocused && !error ? 'opacity-100' : 'opacity-0'}
         `}
@@ -137,7 +137,7 @@ const FormInput: React.FC<FormInputProps> = ({
             {error && (
                 <p
                     id={`${id}-error`}
-                    className="mt-2 text-sm text-red-400 flex items-center gap-2 animate-shake"
+                    className="mt-2 text-sm text-brand-danger flex items-center gap-2 animate-shake"
                 >
                     <i className="fa-solid fa-exclamation-circle text-xs" />
                     {error}

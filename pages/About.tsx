@@ -1,198 +1,180 @@
-import React from 'react';
-import { Page } from '../App';
+import React, { useRef } from 'react';
 import ScrollReveal from '../components/ScrollReveal';
-import MagneticButton from '../components/MagneticButton';
-import GlowOrb from '../components/GlowOrb';
-import GradientText, { AnimatedCounter } from '../components/GradientText';
 
-interface AboutProps {
-    onNavigate: (page: Page) => void;
-}
+const About: React.FC = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
 
-const teamMembers = [
-    { name: 'Alex Chen', role: 'CEO & Founder', avatar: 'AC', color: 'blue', bio: 'Former ops lead at Uber. 10+ years in field service.' },
-    { name: 'Sarah Kim', role: 'CTO', avatar: 'SK', color: 'purple', bio: 'Ex-Google engineer. Built systems serving 100M+ users.' },
-    { name: 'Marcus Johnson', role: 'Head of Product', avatar: 'MJ', color: 'cyan', bio: 'Product veteran from Stripe and Square.' },
-    { name: 'Emily Rodriguez', role: 'Head of Design', avatar: 'ER', color: 'emerald', bio: 'Led design at Airbnb and Figma.' },
-];
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            containerRef.current.style.setProperty('--mouse-x', `${x}px`);
+            containerRef.current.style.setProperty('--mouse-y', `${y}px`);
+        }
+    };
 
-const values = [
-    { icon: 'fa-bolt', title: 'Move Fast', desc: 'We ship weekly. Speed is a feature.' },
-    { icon: 'fa-heart', title: 'Customer Obsessed', desc: 'Every decision starts with the customer.' },
-    { icon: 'fa-code', title: 'Build Beautiful', desc: 'Great software should feel magical.' },
-    { icon: 'fa-handshake', title: 'Win Together', desc: 'Collaboration over competition. Always.' },
-];
-
-const milestones = [
-    { year: '2021', title: 'Founded', desc: 'Started in a garage with a simple idea.' },
-    { year: '2022', title: 'Seed Round', desc: '$4M raised to build the team.' },
-    { year: '2023', title: '10K Users', desc: 'Crossed 10,000 active teams.' },
-    { year: '2024', title: 'Series A', desc: '$25M to scale globally.' },
-];
-
-const About: React.FC<AboutProps> = ({ onNavigate }) => {
     return (
-        <div className="aurora-bg">
-            {/* Hero Section */}
-            <section className="relative pt-40 pb-32 overflow-hidden">
-                <GlowOrb size="xl" color="blue" className="top-0 left-1/4" />
-                <GlowOrb size="lg" color="purple" className="bottom-0 right-1/4" />
+        <div
+            className="cinematic-bg min-h-screen pt-32 pb-20 px-6 relative overflow-hidden"
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+        >
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px] animate-pulse-slow" />
+                <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px]" />
+            </div>
 
-                <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
-                    <ScrollReveal>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
-                            <i className="fa-solid fa-building text-blue-400 text-sm" />
-                            <span className="text-sm text-zinc-300">About Shyft</span>
+            <div className="max-w-7xl mx-auto relative z-10">
+                {/* Hero */}
+                <ScrollReveal>
+                    <div className="text-center mb-24">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300 mb-6 backdrop-blur-md">
+                            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                            Our Vision
                         </div>
-
-                        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-8 leading-tight">
-                            We're building the future of{' '}
-                            <GradientText colors={['#3b82f6', '#8b5cf6', '#06b6d4']}>field operations</GradientText>
+                        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-8">
+                            We're building the future <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">of field service.</span>
                         </h1>
-
-                        <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-                            Shyft is on a mission to empower service businesses with software that's as
-                            powerful as enterprise tools, but as simple as consumer apps.
+                        <p className="text-xl text-zinc-300 max-w-3xl mx-auto leading-relaxed">
+                            Shyft was born from frustration. After watching field service teams struggle with clunky software for years, we decided to build something better.
                         </p>
-                    </ScrollReveal>
-                </div>
-            </section>
+                    </div>
+                </ScrollReveal>
 
-            {/* Stats Section */}
-            <section className="py-24 border-y border-white/10">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {[
-                            { value: 15000, suffix: '+', label: 'Active Teams' },
-                            { value: 2, suffix: 'M+', label: 'Jobs Completed' },
-                            { value: 50, suffix: '+', label: 'Countries' },
-                            { value: 99.9, suffix: '%', label: 'Uptime' },
-                        ].map((stat, i) => (
-                            <div key={i} className="text-center">
-                                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
-                                    <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                                </div>
-                                <div className="text-zinc-500">{stat.label}</div>
+                {/* Story */}
+                <div className="grid md:grid-cols-2 gap-16 mb-32 items-center">
+                    <ScrollReveal>
+                        <div className="space-y-8">
+                            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Our Story</h2>
+                            <div className="space-y-6 text-lg text-zinc-300 leading-relaxed">
+                                <p>
+                                    In 2022, we spoke with over 200 field service businesses. From HVAC companies to electrical contractors, the story was always the same: existing software was built for offices, not trucks.
+                                </p>
+                                <p>
+                                    Technicians hated it because it was slow and complicated. Dispatchers hated it because routing took hours. Owners hated it because they paid thousands per month for software nobody wanted to use.
+                                </p>
+                                <p>
+                                    So we built Shyft. A platform designed from day one for the chaos of field service. Mobile-first, offline-capable, and intelligent enough to handle the complexity without burying you in it.
+                                </p>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Values Section */}
-            <section className="py-32">
-                <div className="max-w-7xl mx-auto px-6">
-                    <ScrollReveal>
-                        <div className="text-center mb-20">
-                            <h2 className="text-4xl font-bold text-white mb-4">Our Values</h2>
-                            <p className="text-zinc-400 max-w-lg mx-auto">The principles that guide everything we do.</p>
                         </div>
                     </ScrollReveal>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {values.map((value, i) => (
-                            <ScrollReveal key={i} delay={i < 2 ? '100' : '200'}>
-                                <div className="group p-8 rounded-2xl bg-zinc-900/30 border border-white/10 hover:border-white/20 transition-all duration-300 h-full">
-                                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <i className={`fa-solid ${value.icon} text-xl text-white`} />
+                    <ScrollReveal delay="100">
+                        <div className="card-spotlight aspect-square rounded-3xl bg-zinc-900/40 border border-white/10 flex items-center justify-center p-8 backdrop-blur-xl">
+                            <div className="text-center">
+                                <div className="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-purple-400 mb-4">2022</div>
+                                <div className="text-xl text-zinc-300 font-medium">Founded in <span className="text-white">San Francisco</span></div>
+                            </div>
+                        </div>
+                    </ScrollReveal>
+                </div>
+
+                {/* Mission */}
+                <ScrollReveal>
+                    <div className="card-spotlight p-12 rounded-3xl bg-zinc-900/30 border border-white/10 mb-32 text-center backdrop-blur-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="relative z-10">
+                            <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-8">
+                                <i className="fa-solid fa-bullseye text-3xl text-emerald-400" />
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">Our Mission</h2>
+                            <p className="text-xl md:text-2xl text-zinc-300 max-w-4xl mx-auto leading-relaxed font-light">
+                                "Make field service software that technicians actually want to use. When your team loves their tools, everything else falls into place: happier customers, higher revenue, less stress."
+                            </p>
+                        </div>
+                    </div>
+                </ScrollReveal>
+
+                {/* Values */}
+                <div className="mb-32">
+                    <ScrollReveal>
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-16 text-center tracking-tight">Values that drive us</h2>
+                    </ScrollReveal>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[
+                            {
+                                icon: 'fa-bolt',
+                                title: 'Speed First',
+                                desc: 'Every feature is designed to save you time. If it slows you down, we kill it.',
+                                color: 'amber'
+                            },
+                            {
+                                icon: 'fa-users',
+                                title: 'Built with Users',
+                                desc: "We ship features our customers ask for, not what looks good in a pitch deck.",
+                                color: 'blue'
+                            },
+                            {
+                                icon: 'fa-shield-halved',
+                                title: 'Rock-Solid Reliability',
+                                desc: 'Your business depends on us. We take that responsibility seriously.',
+                                color: 'emerald'
+                            }
+                        ].map((value, i) => (
+                            <ScrollReveal key={i} delay={`${i * 100}`}>
+                                <div className="card-spotlight p-8 rounded-3xl bg-zinc-900/30 border border-white/10 h-full hover:bg-zinc-900/50 transition-all backdrop-blur-md">
+                                    <div className={`w-14 h-14 rounded-2xl bg-${value.color}-500/10 border border-${value.color}-500/20 flex items-center justify-center mb-6`}>
+                                        <i className={`fa-solid ${value.icon} text-${value.color}-400 text-2xl`} />
                                     </div>
-                                    <h3 className="text-xl font-semibold text-white mb-3">{value.title}</h3>
-                                    <p className="text-zinc-400">{value.desc}</p>
+                                    <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
+                                    <p className="text-zinc-300 leading-relaxed text-lg">{value.desc}</p>
                                 </div>
                             </ScrollReveal>
                         ))}
                     </div>
                 </div>
-            </section>
 
-            {/* Team Section */}
-            <section className="py-32 border-t border-white/10">
-                <div className="max-w-7xl mx-auto px-6">
-                    <ScrollReveal>
-                        <div className="text-center mb-20">
-                            <h2 className="text-4xl font-bold text-white mb-4">Meet the Team</h2>
-                            <p className="text-zinc-400 max-w-lg mx-auto">The people making it all happen.</p>
-                        </div>
-                    </ScrollReveal>
+                {/* Team */}
+                <ScrollReveal>
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">Meet the Team</h2>
+                        <p className="text-xl text-zinc-400">A small team obsessed with making field service better</p>
+                    </div>
+                </ScrollReveal>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {teamMembers.map((member, i) => (
-                            <ScrollReveal key={i} delay={i < 2 ? '100' : '200'}>
-                                <div className="group text-center">
-                                    <div className={`
-                    w-32 h-32 mx-auto rounded-2xl mb-6
-                    bg-gradient-to-br from-${member.color}-500/30 to-${member.color}-600/10
-                    border border-white/10 group-hover:border-white/20
-                    flex items-center justify-center
-                    transition-all duration-300 group-hover:scale-105
-                  `}>
-                                        <span className={`text-3xl font-bold text-${member.color}-400`}>
-                                            {member.avatar}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-white mb-1">{member.name}</h3>
-                                    <p className="text-blue-400 text-sm mb-3">{member.role}</p>
-                                    <p className="text-zinc-500 text-sm">{member.bio}</p>
+                <div className="grid md:grid-cols-4 gap-8 mb-32">
+                    {[
+                        { name: 'Sarah Chen', role: 'Co-Founder & CEO', avatar: 'SC', color: 'blue' },
+                        { name: 'Marcus Rodriguez', role: 'Co-Founder & CTO', avatar: 'MR', color: 'purple' },
+                        { name: 'Emily Wu', role: 'Head of Product', avatar: 'EW', color: 'cyan' },
+                        { name: 'James Park', role: 'Head of Engineering', avatar: 'JP', color: 'emerald' }
+                    ].map((member, i) => (
+                        <ScrollReveal key={i} delay={`${i * 50}`}>
+                            <div className="card-spotlight rounded-3xl bg-zinc-900/20 border border-white/5 p-6 hover:border-white/20 transition-all group backdrop-blur-sm text-center">
+                                <div className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-${member.color}-500/20 to-${member.color}-600/20 ring-1 ring-${member.color}-400/30 flex items-center justify-center text-2xl font-bold text-white group-hover:scale-105 transition-transform shadow-lg shadow-${member.color}-500/10`}>
+                                    {member.avatar}
                                 </div>
-                            </ScrollReveal>
-                        ))}
-                    </div>
+                                <div className="text-lg font-bold text-white mb-1">{member.name}</div>
+                                <div className="text-sm text-zinc-500 font-medium uppercase tracking-wide">{member.role}</div>
+                            </div>
+                        </ScrollReveal>
+                    ))}
                 </div>
-            </section>
 
-            {/* Timeline Section */}
-            <section className="py-32 border-t border-white/10">
-                <div className="max-w-4xl mx-auto px-6">
-                    <ScrollReveal>
-                        <div className="text-center mb-20">
-                            <h2 className="text-4xl font-bold text-white mb-4">Our Journey</h2>
-                        </div>
-                    </ScrollReveal>
-
-                    <div className="relative">
-                        {/* Vertical line */}
-                        <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-blue-500 via-purple-500 to-transparent" />
-
-                        <div className="space-y-12">
-                            {milestones.map((milestone, i) => (
-                                <ScrollReveal key={i} delay={i % 2 === 0 ? '0' : '100'}>
-                                    <div className="flex gap-8 items-start">
-                                        <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0 relative z-10">
-                                            <span className="text-sm font-bold text-white">{milestone.year}</span>
-                                        </div>
-                                        <div className="pt-4">
-                                            <h3 className="text-xl font-semibold text-white mb-2">{milestone.title}</h3>
-                                            <p className="text-zinc-400">{milestone.desc}</p>
-                                        </div>
-                                    </div>
-                                </ScrollReveal>
-                            ))}
+                {/* CTA */}
+                <ScrollReveal>
+                    <div className="card-spotlight text-center p-16 rounded-[2.5rem] bg-zinc-900/30 border border-white/10 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-cyan-500/5" />
+                        <div className="relative z-10">
+                            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+                                Join our mission
+                            </h2>
+                            <p className="text-xl text-zinc-300 mb-10 max-w-2xl mx-auto">
+                                We're always looking for talented people who want to make a real impact.
+                                Check out our open positions.
+                            </p>
+                            <button className="px-8 py-4 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-all shadow-lg shadow-white/10 hover:shadow-white/20 hover:-translate-y-1 active:translate-y-0 text-lg">
+                                View Careers
+                                <i className="fa-solid fa-arrow-right ml-2" />
+                            </button>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="py-32 border-t border-white/10">
-                <div className="max-w-4xl mx-auto px-6 text-center">
-                    <ScrollReveal>
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                            Ready to join the movement?
-                        </h2>
-                        <p className="text-xl text-zinc-400 mb-10">
-                            Start your free trial today. No credit card required.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                            <MagneticButton variant="primary" size="lg" onClick={() => onNavigate('signup')}>
-                                Start Free Trial
-                            </MagneticButton>
-                            <MagneticButton variant="secondary" size="lg" onClick={() => onNavigate('contact')}>
-                                Contact Sales
-                            </MagneticButton>
-                        </div>
-                    </ScrollReveal>
-                </div>
-            </section>
+                </ScrollReveal>
+            </div>
         </div>
     );
 };
