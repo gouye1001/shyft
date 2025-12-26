@@ -64,8 +64,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
 
             if (result.success) {
                 onShowToast?.('success', 'Welcome back! Redirecting...');
-                // Navigate directly to dashboard (SPA navigation)
-                setTimeout(() => navigate('/dashboard', { replace: true }), 300);
+                setTimeout(() => navigate('/verify-success', { replace: true, state: { type: 'login' } }), 300);
             } else {
                 onShowToast?.('error', result.error || 'Login failed');
                 setErrors({ password: result.error });

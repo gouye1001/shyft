@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../src/context/AuthContext';
+import { getMarketingUrl } from '../../src/hooks/useSubdomain';
 
 const mainNavItems = [
     { path: '/', label: 'Dashboard', icon: 'fa-gauge-high' },
@@ -38,7 +39,7 @@ const AppLayout: React.FC = () => {
 
     const handleLogout = async () => {
         await logout();
-        navigate('/', { replace: true });
+        window.location.href = getMarketingUrl();
     };
 
     // Check if user is admin (for showing admin section)
