@@ -1,11 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { Page } from '../App';
 import ScrollReveal from '../components/ScrollReveal';
 import FormInput from '../components/FormInput';
 import MagneticButton from '../components/MagneticButton';
 
 interface ContactProps {
-    onNavigate: (page: Page) => void;
     onShowToast?: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
@@ -16,14 +14,13 @@ const faqs = [
     { q: 'Do you offer enterprise plans?', a: 'Yes! We offer custom dedicated instances, SLA guarantees, and priority support for large teams.' },
 ];
 
-const Contact: React.FC<ContactProps> = ({ onNavigate, onShowToast }) => {
+const Contact: React.FC<ContactProps> = ({ onShowToast }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -90,15 +87,17 @@ const Contact: React.FC<ContactProps> = ({ onNavigate, onShowToast }) => {
                     </ScrollReveal>
                 </div>
 
-                {/* Main Content */}
-                <div className="grid lg:grid-cols-2 gap-16 items-start">
+                {/* Main Content Grid */}
+                <div className="grid lg:grid-cols-2 gap-8 items-stretch mb-32">
                     {/* Contact Form */}
-                    <ScrollReveal>
-                        <div className="card-spotlight bg-zinc-900/40 border border-white/10 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl shadow-2xl">
-                            <h2 className="text-2xl font-bold text-white mb-2">Send us a message</h2>
-                            <p className="text-zinc-300 mb-10">We'll respond within 24 hours.</p>
+                    <ScrollReveal className="h-full">
+                        <div className="card-spotlight h-full bg-zinc-900/40 border border-white/10 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl shadow-2xl flex flex-col">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white mb-2">Send us a message</h2>
+                                <p className="text-zinc-300 mb-10">We'll respond within 24 hours.</p>
+                            </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6 flex-grow">
                                 <div className="grid grid-cols-2 gap-6">
                                     <FormInput
                                         id="contact-name"
@@ -148,7 +147,7 @@ const Contact: React.FC<ContactProps> = ({ onNavigate, onShowToast }) => {
                                     variant="primary"
                                     size="lg"
                                     type="submit"
-                                    className="w-full"
+                                    className="w-full mt-auto"
                                     loading={isLoading}
                                 >
                                     Send Message
@@ -157,72 +156,58 @@ const Contact: React.FC<ContactProps> = ({ onNavigate, onShowToast }) => {
                         </div>
                     </ScrollReveal>
 
-                    {/* Info & FAQ */}
-                    <div className="space-y-12 pt-8">
-                        {/* Contact Info */}
-                        <ScrollReveal delay="100">
-                            <div className="space-y-8">
-                                <h2 className="text-2xl font-bold text-white">Other ways to reach us</h2>
+                    {/* Contact Info - Wrapped in matching card */}
+                    <ScrollReveal delay="100" className="h-full">
+                        <div className="card-spotlight h-full bg-zinc-900/40 border border-white/10 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl shadow-2xl flex flex-col">
+                            <h2 className="text-2xl font-bold text-white mb-2">Other ways to reach us</h2>
+                            <p className="text-zinc-300 mb-10">We're here to help.</p>
 
-                                <div className="grid gap-4">
-                                    {[
-                                        { icon: 'fa-envelope', label: 'Email', value: 'hello@shyft.io', href: 'mailto:hello@shyft.io', color: 'blue' },
-                                        { icon: 'fa-phone', label: 'Phone', value: '+1 (555) 123-4567', href: 'tel:+15551234567', color: 'cyan' },
-                                        { icon: 'fa-location-dot', label: 'Office', value: '123 Tech Street, SF, CA 94105', color: 'purple' },
-                                    ].map((item, i) => (
-                                        <div key={i} className="card-spotlight flex items-center gap-6 p-6 rounded-3xl bg-zinc-900/30 border border-white/5 hover:border-white/20 transition-all group backdrop-blur-md">
-                                            <div className={`w-14 h-14 rounded-2xl bg-${item.color}-500/10 border border-${item.color}-500/20 flex items-center justify-center group-hover:bg-${item.color}-500/20 transition-colors`}>
-                                                <i className={`fa-solid ${item.icon} text-${item.color}-400 text-xl`} />
-                                            </div>
-                                            <div>
-                                                <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-1">{item.label}</div>
-                                                {item.href ? (
-                                                    <a href={item.href} className="text-lg text-white hover:text-blue-400 transition-colors font-medium">{item.value}</a>
-                                                ) : (
-                                                    <div className="text-lg text-white font-medium">{item.value}</div>
-                                                )}
-                                            </div>
+                            <div className="space-y-6 flex-grow flex flex-col justify-center">
+                                {[
+                                    { icon: 'fa-envelope', label: 'Email', value: 'hello@shyft.io', href: 'mailto:hello@shyft.io', color: 'blue' },
+                                    { icon: 'fa-phone', label: 'Phone', value: '+1 (555) 123-4567', href: 'tel:+15551234567', color: 'cyan' },
+                                    { icon: 'fa-location-dot', label: 'Office', value: '123 Tech Street, SF, CA 94105', color: 'purple' },
+                                ].map((item, i) => (
+                                    <div key={i} className="flex items-center gap-6 p-6 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group">
+                                        <div className={`w-14 h-14 rounded-2xl bg-${item.color}-500/10 border border-${item.color}-500/20 flex items-center justify-center group-hover:bg-${item.color}-500/20 transition-colors`}>
+                                            <i className={`fa-solid ${item.icon} text-${item.color}-400 text-xl`} />
                                         </div>
-                                    ))}
-                                </div>
+                                        <div>
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-1">{item.label}</div>
+                                            {item.href ? (
+                                                <a href={item.href} className="text-lg text-white hover:text-blue-400 transition-colors font-medium">{item.value}</a>
+                                            ) : (
+                                                <div className="text-lg text-white font-medium">{item.value}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </ScrollReveal>
 
-                        {/* FAQ */}
-                        <ScrollReveal delay="200">
-                            <div>
-                                <h2 className="text-2xl font-bold text-white mb-8">FAQ</h2>
-                                <div className="space-y-4">
-                                    {faqs.map((faq, i) => (
-                                        <div
-                                            key={i}
-                                            className={`rounded-2xl border transition-all duration-300 overflow-hidden ${expandedFaq === i
-                                                ? 'bg-zinc-900/50 border-white/20'
-                                                : 'bg-zinc-900/20 border-white/5 hover:border-white/10'
-                                                }`}
-                                        >
-                                            <button
-                                                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                                                className="w-full flex items-center justify-between p-6 text-left"
-                                            >
-                                                <span className="text-white font-medium text-lg pr-4">{faq.q}</span>
-                                                <i className={`fa-solid fa-chevron-down text-zinc-500 transition-transform duration-300 ${expandedFaq === i ? 'rotate-180 text-white' : ''}`} />
-                                            </button>
-                                            <div
-                                                className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedFaq === i ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
-                                                    }`}
-                                            >
-                                                <div className="px-6 pb-6 text-zinc-300 leading-relaxed border-t border-white/5 pt-4">
-                                                    {faq.a}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                            {/* Decorative element or map placeholder could go here if needed to fill space */}
+                            <div className="mt-8 pt-8 border-t border-white/5">
+                                <p className="text-zinc-500 text-sm">
+                                    Support hours: Monday - Friday, 9am - 6pm PST
+                                </p>
                             </div>
-                        </ScrollReveal>
-                    </div>
+                        </div>
+                    </ScrollReveal>
                 </div>
+
+                {/* FAQ Section - Full width below */}
+                <ScrollReveal delay="200">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-3xl font-bold text-white mb-12 text-center">Frequently Asked Questions</h2>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {faqs.map((faq, i) => (
+                                <div key={i} className="card-spotlight p-8 rounded-3xl bg-zinc-900/30 border border-white/10 hover:border-white/20 transition-all">
+                                    <h4 className="text-white font-bold mb-3">{faq.q}</h4>
+                                    <p className="text-zinc-400 text-sm leading-relaxed">{faq.a}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollReveal>
             </div>
         </div>
     );

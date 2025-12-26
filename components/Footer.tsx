@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
-import { Page } from '../App';
+import { Link } from 'react-router-dom';
 
-interface FooterProps {
-    onNavigate: (page: Page) => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+const Footer: React.FC = () => {
     const [email, setEmail] = useState('');
     const [isSubscribed, setIsSubscribed] = useState(false);
 
@@ -22,28 +18,28 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
     const footerLinks = {
         Product: [
-            { label: 'Features', page: 'features' as Page },
-            { label: 'Pricing', page: 'pricing' as Page },
-            { label: 'Dashboard Demo', page: 'dashboard' as Page },
-            { label: 'API Docs', external: true },
+            { label: 'Features', path: '/features' },
+            { label: 'Pricing', path: '/pricing' },
+            { label: 'Dashboard Demo', path: '/dashboard' },
+            { label: 'API Docs', path: '/help', external: false },
         ],
         Company: [
-            { label: 'About', page: 'about' as Page },
-            { label: 'Careers', external: true },
-            { label: 'Blog', external: true },
-            { label: 'Press', external: true },
+            { label: 'About', path: '/about' },
+            { label: 'Careers', comingSoon: true },
+            { label: 'Blog', comingSoon: true },
+            { label: 'Press', comingSoon: true },
         ],
         Resources: [
-            { label: 'Help Center', external: true },
-            { label: 'Contact', page: 'contact' as Page },
-            { label: 'Community', external: true },
-            { label: 'Status', external: true },
+            { label: 'Help Center', path: '/help' },
+            { label: 'Contact', path: '/contact' },
+            { label: 'Community', comingSoon: true },
+            { label: 'Status', comingSoon: true },
         ],
         Legal: [
-            { label: 'Privacy', page: 'privacy' as Page },
-            { label: 'Terms', page: 'terms' as Page },
-            { label: 'Security', external: true },
-            { label: 'Cookies', external: true },
+            { label: 'Privacy', path: '/privacy' },
+            { label: 'Terms', path: '/terms' },
+            { label: 'Security', comingSoon: true },
+            { label: 'Cookies', comingSoon: true },
         ],
     };
 
@@ -90,9 +86,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-12 py-16">
                     {/* Brand */}
                     <div className="col-span-2 md:col-span-1">
-                        <div
-                            className="flex items-center gap-2.5 cursor-pointer group mb-6"
-                            onClick={() => onNavigate('home')}
+                        <Link
+                            to="/"
+                            className="flex items-center gap-2.5 group mb-6"
                         >
                             <div className="w-9 h-9 rounded-xl bg-brand-surface border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <svg viewBox="0 0 32 32" fill="none" className="w-[60%] h-[60%]">
@@ -101,7 +97,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                                 </svg>
                             </div>
                             <span className="font-bold text-lg text-white">Shyft</span>
-                        </div>
+                        </Link>
                         <p className="text-sm text-zinc-500 mb-6">
                             The modern platform for field service management.
                         </p>
@@ -130,18 +126,25 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                             <ul className="space-y-3">
                                 {links.map((link) => (
                                     <li key={link.label}>
-                                        {link.external ? (
+                                        {'comingSoon' in link && link.comingSoon ? (
+                                            <span className="text-sm text-zinc-600 cursor-not-allowed flex items-center gap-1 group">
+                                                {link.label}
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800/50 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    Coming soon
+                                                </span>
+                                            </span>
+                                        ) : 'external' in link && link.external ? (
                                             <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-1">
                                                 {link.label}
                                                 <i className="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-50" />
                                             </a>
                                         ) : (
-                                            <button
-                                                onClick={() => link.page && onNavigate(link.page)}
+                                            <Link
+                                                to={link.path || '/'}
                                                 className="text-sm text-zinc-400 hover:text-white transition-colors"
                                             >
                                                 {link.label}
-                                            </button>
+                                            </Link>
                                         )}
                                     </li>
                                 ))}

@@ -1,9 +1,23 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
 import MagneticButton from './MagneticButton';
 import GradientText from './GradientText';
+import { useAuth } from '../src/context/AuthContext';
 
 const HeroSection: React.FC = () => {
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+
+    const handleStartTrial = () => {
+        navigate(isAuthenticated ? '/dashboard' : '/signup');
+    };
+
+    const handleWatchFilm = () => {
+        // Navigate to features section as a demo showcase
+        navigate('/features');
+    };
+
     return (
         <section className="relative pt-32 md:pt-48 pb-32 lg:pt-56 lg:pb-48 overflow-hidden bg-black selection:bg-blue-500/30">
             {/* Ambient Background */}
@@ -46,11 +60,11 @@ const HeroSection: React.FC = () => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-16">
-                        <MagneticButton variant="primary" size="lg" className="shadow-lg shadow-brand-accent/20">
-                            <span className="font-semibold">Start free trial</span>
+                        <MagneticButton variant="primary" size="lg" className="shadow-lg shadow-brand-accent/20" onClick={handleStartTrial}>
+                            <span className="font-semibold">{isAuthenticated ? 'Go to Dashboard' : 'Start free trial'}</span>
                             <i className="fa-solid fa-arrow-right text-sm ml-2" />
                         </MagneticButton>
-                        <MagneticButton variant="secondary" size="lg">
+                        <MagneticButton variant="secondary" size="lg" onClick={handleWatchFilm}>
                             <i className="fa-solid fa-play text-xs mr-2" />
                             <span className="font-medium">Watch the film</span>
                         </MagneticButton>

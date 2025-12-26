@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
 
 const PricingSection: React.FC = () => {
@@ -23,57 +24,97 @@ const PricingSection: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Free - De-emphasized */}
                     <div className="p-8 rounded-3xl border border-white/5 bg-zinc-950/30 flex flex-col">
-                        <div className="mb-8">
-                            <h3 className="text-lg font-medium text-white mb-2">Starter</h3>
-                            <p className="text-zinc-500 text-sm">For individuals.</p>
-                        </div>
-                        <div className="mb-8">
-                            <span className="text-3xl font-semibold text-zinc-400">Free</span>
-                        </div>
-                        <ul className="space-y-4 text-sm text-zinc-400 flex-1 mb-8">
-                            <li className="flex gap-3"><span className="text-zinc-500">✓</span> 1 User</li>
-                            <li className="flex gap-3"><span className="text-zinc-500">✓</span> 20 Jobs / mo</li>
-                            <li className="flex gap-3"><span className="text-zinc-500">✓</span> Basic Mobile App</li>
+                        <h3 className="text-xl font-bold text-white mb-2">Starter</h3>
+                        <div className="text-3xl font-bold text-white mb-1">Free</div>
+                        <p className="text-zinc-500 text-sm mb-6">For individuals getting started</p>
+                        <ul className="space-y-3 text-sm text-zinc-400 mb-8 flex-grow">
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                Up to 3 team members
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                Basic scheduling
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                Mobile app access
+                            </li>
                         </ul>
-                        <button className="w-full py-3 rounded-full border border-white/10 text-zinc-400 font-medium hover:bg-white/5 hover:text-white transition-all">Get Started</button>
+                        <Link
+                            to="/signup"
+                            className="w-full py-3 rounded-full border border-white/10 text-zinc-400 font-medium hover:bg-white/5 hover:text-white transition-all text-center"
+                        >
+                            Get Started
+                        </Link>
                     </div>
 
-                    {/* Pro - Subtle highlight */}
-                    <div className="p-8 rounded-3xl border border-white/10 bg-zinc-900/40 flex flex-col relative">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-white/10 backdrop-blur-md text-white text-xs font-medium rounded-full border border-white/10">
+                    {/* Pro - Featured */}
+                    <div className="relative p-8 rounded-3xl border-2 border-white/20 bg-zinc-900/50 flex flex-col pt-6">
+                        <div className="inline-block self-start px-3 py-1 bg-zinc-900 text-white text-[10px] font-medium uppercase tracking-wider rounded-full border border-white/20 mb-4">
                             Popular
                         </div>
-                        <div className="mb-8 mt-2">
-                            <h3 className="text-lg font-medium text-white mb-2">Pro</h3>
-                            <p className="text-zinc-500 text-sm">For growing teams.</p>
-                        </div>
-                        <div className="mb-8">
+                        <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
+                        <div className="flex items-baseline gap-1 mb-1">
                             <span className="text-4xl font-bold text-white">$29</span>
-                            <span className="text-zinc-500"> / user</span>
+                            <span className="text-zinc-500">/user/mo</span>
                         </div>
-                        <ul className="space-y-4 text-sm text-zinc-300 flex-1 mb-8">
-                            <li className="flex gap-3"><span className="text-blue-400">✓</span> Unlimited Jobs</li>
-                            <li className="flex gap-3"><span className="text-blue-400">✓</span> Route Optimization</li>
-                            <li className="flex gap-3"><span className="text-blue-400">✓</span> QuickBooks Sync</li>
+                        <p className="text-zinc-500 text-sm mb-6">For growing teams</p>
+                        <ul className="space-y-3 text-sm text-zinc-300 mb-8 flex-grow">
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-white" />
+                                Unlimited team members
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-white" />
+                                Advanced scheduling
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-white" />
+                                Real-time GPS tracking
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-white" />
+                                Priority support
+                            </li>
                         </ul>
-                        <button className="w-full py-3 rounded-full bg-white text-black font-medium hover:bg-zinc-200 transition-all">Start Trial</button>
+                        <Link
+                            to="/signup"
+                            className="w-full py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-all text-center"
+                        >
+                            Start Trial
+                        </Link>
                     </div>
 
-                    {/* Enterprise - Subtle */}
+                    {/* Enterprise */}
                     <div className="p-8 rounded-3xl border border-white/5 bg-zinc-950/30 flex flex-col">
-                        <div className="mb-8">
-                            <h3 className="text-lg font-medium text-white mb-2">Enterprise</h3>
-                            <p className="text-zinc-500 text-sm">For organizations.</p>
-                        </div>
-                        <div className="mb-8">
-                            <span className="text-3xl font-semibold text-zinc-300">Custom</span>
-                        </div>
-                        <ul className="space-y-4 text-sm text-zinc-400 flex-1 mb-8">
-                            <li className="flex gap-3"><span className="text-zinc-500">✓</span> SSO & Audit Logs</li>
-                            <li className="flex gap-3"><span className="text-zinc-500">✓</span> Dedicated Support</li>
-                            <li className="flex gap-3"><span className="text-zinc-500">✓</span> Custom API</li>
+                        <h3 className="text-xl font-bold text-white mb-2">Enterprise</h3>
+                        <div className="text-3xl font-bold text-white mb-1">Custom</div>
+                        <p className="text-zinc-500 text-sm mb-6">For large organizations</p>
+                        <ul className="space-y-3 text-sm text-zinc-400 mb-8 flex-grow">
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                SSO & SAML
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                Dedicated support
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                Custom integrations
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <i className="fa-solid fa-check text-xs text-zinc-500" />
+                                SLA guarantees
+                            </li>
                         </ul>
-                        <button className="w-full py-3 rounded-full border border-white/10 text-zinc-400 font-medium hover:bg-white/5 hover:text-white transition-all">Contact Us</button>
+                        <Link
+                            to="/enterprise"
+                            className="w-full py-3 rounded-full border border-white/10 text-zinc-400 font-medium hover:bg-white/5 hover:text-white transition-all text-center"
+                        >
+                            Contact Sales
+                        </Link>
                     </div>
                 </div>
             </div>

@@ -1,22 +1,61 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Page } from '../App';
+import { useNavigate, Link } from 'react-router-dom';
 import { AnimatedCounter } from '../components/GradientText';
 import { mockJobs, mockTeam, mockStats } from '../src/utils/mockData';
+import { useAuth } from '../src/context/AuthContext';
+import OnboardingGuide from '../components/OnboardingGuide';
 
-interface DashboardProps {
-    onNavigate: (page: Page) => void;
-}
+const ONBOARDING_STORAGE_KEY = 'shyft_onboarding_completed';
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+const Dashboard: React.FC = () => {
     const [selectedJob, setSelectedJob] = useState<number | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [sidebarTab, setSidebarTab] = useState<'jobs' | 'team'>('jobs');
+    const [showSettings, setShowSettings] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const navigate = useNavigate();
+    const { user, logout, updateUser } = useAuth();
+
+    // Settings state
+    const [settingsName, setSettingsName] = useState(user?.name || '');
+    const [settingsEmail, setSettingsEmail] = useState(user?.email || '');
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    const handleSaveSettings = () => {
+        updateUser({ name: settingsName, email: settingsEmail });
+        setShowSettings(false);
+    };
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Check if user needs onboarding
+    useEffect(() => {
+        const hasCompletedOnboarding = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+        if (!hasCompletedOnboarding) {
+            // Delay showing onboarding to let page load
+            const timer = setTimeout(() => setShowOnboarding(true), 500);
+            return () => clearTimeout(timer);
+        }
+    }, []);
+
+    const handleOnboardingComplete = () => {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+        setShowOnboarding(false);
+    };
+
+    const handleOnboardingDismiss = () => {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+        setShowOnboarding(false);
+    };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -56,18 +95,43 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[150px]" />
             </div>
 
-            {/* Demo Banner */}
-            <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 border-y border-white/5 py-2 px-6 text-center backdrop-blur-md relative z-20">
-                <span className="text-xs md:text-sm text-zinc-300 flex items-center justify-center gap-2">
-                    <i className="fa-solid fa-sparkles text-amber-400" />
-                    Interactive Demo Mode
-                    <button
-                        onClick={() => onNavigate('signup')}
-                        className="ml-2 text-white font-medium hover:text-blue-400 transition-colors"
+            {/* Top Bar with Navigation */}
+            <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 border-y border-white/5 py-2 px-6 backdrop-blur-md relative z-20">
+                <div className="flex items-center justify-between">
+                    {/* Left: Back to Home */}
+                    <Link
+                        to="/"
+                        className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm"
                     >
-                        Start your free trial →
-                    </button>
-                </span>
+                        <i className="fa-solid fa-arrow-left text-xs" />
+                        <span>Home</span>
+                    </Link>
+
+                    {/* Center: User Info */}
+                    <span className="text-xs md:text-sm text-zinc-300 flex items-center gap-2">
+                        <i className="fa-solid fa-sparkles text-amber-400" />
+                        Logged in as {user?.name || 'User'}
+                    </span>
+
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowOnboarding(true)}
+                            className="text-zinc-400 hover:text-white transition-colors text-sm flex items-center gap-1.5"
+                        >
+                            <i className="fa-solid fa-circle-question text-xs" />
+                            <span className="hidden sm:inline">Help</span>
+                        </button>
+                        <span className="w-px h-4 bg-white/10" />
+                        <button
+                            onClick={handleLogout}
+                            className="text-red-400 hover:text-red-300 font-medium transition-colors text-sm flex items-center gap-1.5"
+                        >
+                            <i className="fa-solid fa-right-from-bracket text-xs" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="flex flex-1 overflow-hidden relative z-10">
@@ -77,12 +141,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <div className="p-6 border-b border-white/5">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <span className="text-white font-bold text-lg">S</span>
+                                <span className="text-white font-bold text-lg">{user?.name?.charAt(0) || 'U'}</span>
                             </div>
-                            <div>
-                                <div className="text-white font-semibold tracking-tight">Acme Services</div>
-                                <div className="text-xs text-zinc-500 font-medium">Pro Plan</div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-white font-semibold tracking-tight truncate">{user?.name || 'User'}</div>
+                                <div className="text-xs text-zinc-500 font-medium truncate">{user?.email || 'Pro Plan'}</div>
                             </div>
+                            <button
+                                onClick={() => setShowSettings(true)}
+                                className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                            >
+                                <i className="fa-solid fa-gear" />
+                            </button>
                         </div>
                     </div>
 
@@ -137,7 +207,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <div className="flex justify-between items-end mb-8">
                         <div>
                             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                                Good {currentTime.getHours() < 12 ? 'morning' : currentTime.getHours() < 18 ? 'afternoon' : 'evening'}, Alex
+                                Good {currentTime.getHours() < 12 ? 'morning' : currentTime.getHours() < 18 ? 'afternoon' : 'evening'}, {user?.name?.split(' ')[0] || 'there'}
                             </h1>
                             <p className="text-zinc-400 flex items-center gap-2">
                                 <i className="fa-regular fa-calendar text-zinc-500" />
@@ -330,6 +400,84 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     </div>
                 </main>
             </div>
+
+            {/* Settings Modal */}
+            {showSettings && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setShowSettings(false)}
+                    />
+
+                    {/* Modal */}
+                    <div className="relative bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                            <h2 className="text-lg font-semibold text-white">Account Settings</h2>
+                            <button
+                                onClick={() => setShowSettings(false)}
+                                className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-400 mb-2">
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={settingsName}
+                                    onChange={(e) => setSettingsName(e.target.value)}
+                                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                                    placeholder="Your name"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-400 mb-2">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={settingsEmail}
+                                    onChange={(e) => setSettingsEmail(e.target.value)}
+                                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                                    placeholder="your@email.com"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10 bg-zinc-900/50">
+                            <button
+                                onClick={() => setShowSettings(false)}
+                                className="px-4 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveSettings}
+                                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors font-medium"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Onboarding Guide */}
+            {showOnboarding && (
+                <OnboardingGuide
+                    userName={user?.name || 'there'}
+                    onComplete={handleOnboardingComplete}
+                    onDismiss={handleOnboardingDismiss}
+                />
+            )}
         </div>
     );
 };
