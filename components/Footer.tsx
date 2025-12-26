@@ -94,8 +94,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                             className="flex items-center gap-2.5 cursor-pointer group mb-6"
                             onClick={() => onNavigate('home')}
                         >
-                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <span className="text-white font-bold text-sm">S</span>
+                            <div className="w-9 h-9 rounded-xl bg-brand-surface border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <svg viewBox="0 0 32 32" fill="none" className="w-[60%] h-[60%]">
+                                    <path d="M8 7L16 13L8 19" stroke="#5B5BD6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M24 13L16 19L24 25" stroke="#5B5BD6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
                             </div>
                             <span className="font-bold text-lg text-white">Shyft</span>
                         </div>

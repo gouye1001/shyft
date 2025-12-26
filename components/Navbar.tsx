@@ -35,10 +35,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   }, [currentPage]);
 
   const navLinks = [
-    { label: 'Features', page: 'features' as Page },
+    { label: 'Product', page: 'features' as Page },
+    { label: 'Solutions', page: 'about' as Page },
     { label: 'Pricing', page: 'pricing' as Page },
-    { label: 'About', page: 'about' as Page },
-    { label: 'Contact', page: 'contact' as Page },
+    { label: 'Enterprise', page: 'contact' as Page },
   ];
 
   return (
@@ -87,13 +87,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             <div className="hidden md:flex items-center gap-2">
               <button
                 onClick={() => onNavigate('login')}
-                className="nav-item text-zinc-400 hover:text-white font-medium transition-colors"
+                className="nav-item text-zinc-400 hover:text-white font-medium transition-all border border-transparent hover:border-white/10 rounded-full whitespace-nowrap"
               >
                 Log in
               </button>
               <button
                 onClick={() => onNavigate('signup')}
-                className="nav-cta bg-white text-black font-semibold rounded-full hover:bg-zinc-100 transition-colors"
+                className="nav-cta bg-white text-black font-semibold rounded-full hover:bg-zinc-100 transition-colors whitespace-nowrap"
               >
                 Start Free
               </button>

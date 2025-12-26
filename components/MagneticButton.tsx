@@ -49,7 +49,7 @@ const MagneticButton: React.FC<MagneticButtonProps> = ({
     const variantClasses = {
         primary: `
       bg-white text-black font-semibold
-      hover:shadow-[0_0_40px_-5px_rgba(255,255,255,0.4)]
+      hover:shadow-[0_0_40px_-5px_rgba(255,255,255,0.3),inset_0_1px_0_rgba(255,255,255,0.2)]
       active:scale-95
     `,
         secondary: `

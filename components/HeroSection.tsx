@@ -25,30 +25,28 @@ const HeroSection: React.FC = () => {
             <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
                 <ScrollReveal>
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md shadow-2xl shadow-blue-500/10 hover:bg-white/10 transition-colors cursor-default">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md shadow-2xl shadow-brand-accent/10 hover:bg-white/10 transition-colors cursor-default">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-accent"></span>
                         </span>
-                        <span className="text-sm font-medium text-blue-100/80">v2.4 is now live</span>
+                        <span className="text-sm font-medium text-brand-accent-light">v2.4 is now live</span>
                     </div>
 
-                    <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-white mb-8 leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50">
-                        Orchestrate{' '}
+                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-[0.95] mb-8 bg-gradient-to-b from-white via-white/90 to-zinc-500 bg-clip-text text-transparent">
+                        Built for teams{' '}
                         <br className="hidden sm:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400">
-                            the field.
-                        </span>
+                        that move.
                     </h1>
 
-                    <p className="text-lg sm:text-xl md:text-2xl text-zinc-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed tracking-wide">
-                        The operating system for modern service teams.
+                    <p className="text-lg sm:text-xl md:text-2xl text-zinc-400 mb-12 max-w-2xl mx-auto font-normal leading-relaxed">
+                        The modern platform for field service management.
                         <br className="hidden sm:block" />
-                        <span className="text-zinc-500">Beautifully simple. Insanely powerful.</span>
+                        <span className="text-zinc-500">Dispatch. Track. Deliver.</span>
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-16">
-                        <MagneticButton variant="primary" size="lg" className="shadow-lg shadow-blue-500/20">
+                        <MagneticButton variant="primary" size="lg" className="shadow-lg shadow-brand-accent/20">
                             <span className="font-semibold">Start free trial</span>
                             <i className="fa-solid fa-arrow-right text-sm ml-2" />
                         </MagneticButton>
