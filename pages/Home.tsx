@@ -6,13 +6,8 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import IntegrationsSection from '../components/IntegrationsSection';
 import PricingSection from '../components/PricingSection';
 import CTASection from '../components/CTASection';
-import { Page } from '../App';
 
-interface HomeProps {
-    onNavigate: (page: Page) => void;
-}
-
-const Home: React.FC<HomeProps> = ({ onNavigate }) => {
+const Home: React.FC = () => {
     return (
         <>
             <HeroSection />

@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+
+// Layout Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Pages
 import Home from './pages/Home';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
@@ -14,85 +20,114 @@ import Enterprise from './pages/Enterprise';
 import Help from './pages/Help';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import NotFound from './pages/NotFound';
+
+// Context & Utils
 import { ToastContainer, useToast } from './components/Toast';
 import { AppProvider } from './src/context/AppContext';
+import { AuthProvider } from './src/context/AuthContext';
 
-export type Page = 'home' | 'features' | 'pricing' | 'login' | 'signup' | 'dashboard' | 'forgotPassword' | 'about' | 'contact' | 'enterprise' | 'help' | 'terms' | 'privacy';
+// ============================================
+// Scroll to Top Component
+// ============================================
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const toast = useToast();
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
 
-  // Page transition effect
-  const navigate = (page: Page) => {
-    if (page === currentPage) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentPage(page);
-      setIsTransitioning(false);
-    }, 200);
-  };
-
-  // Scroll to top on page change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
+  }, [pathname]);
 
-  // Check if in dashboard/auth pages (no navbar/footer)
-  const isFullscreenPage = currentPage === 'dashboard';
-  const isAuthPage = ['login', 'signup', 'forgotPassword'].includes(currentPage);
+  return null;
+};
 
-  const renderPage = () => {
-    const pageProps = {
-      onNavigate: navigate,
-      onShowToast: toast.addToast,
-    };
+// ============================================
+// Layout Component
+// ============================================
 
-    switch (currentPage) {
-      case 'home': return <Home onNavigate={navigate} />;
-      case 'features': return <Features />;
-      case 'pricing': return <Pricing onNavigate={navigate} />;
-      case 'login': return <Login {...pageProps} />;
-      case 'signup': return <Signup {...pageProps} />;
-      case 'dashboard': return <Dashboard onNavigate={navigate} />;
-      case 'forgotPassword': return <ForgotPassword {...pageProps} />;
-      case 'about': return <About onNavigate={navigate} />;
-      case 'contact': return <Contact onNavigate={navigate} onShowToast={toast.addToast} />;
-      case 'enterprise': return <Enterprise onNavigate={navigate} onShowToast={toast.addToast} />;
-      case 'help': return <Help />;
-      case 'terms': return <Terms />;
-      case 'privacy': return <Privacy />;
-      default: return <Home onNavigate={navigate} />;
-    }
-  };
+interface LayoutProps {
+  children: React.ReactNode;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children, hideNavbar, hideFooter }) => {
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
+      <main className="flex-grow">{children}</main>
+      {!hideFooter && <Footer />}
+    </>
+  );
+};
+
+// ============================================
+// App Routes Component
+// ============================================
+
+const AppRoutes: React.FC = () => {
+  const toast = useToast();
 
   return (
-    <AppProvider>
-      <div className="font-sans text-zinc-300 bg-black overflow-x-hidden min-h-screen flex flex-col noise-overlay">
-        {/* Toast Notifications */}
-        <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
+    <>
+      <ScrollToTop />
 
-        {/* Navigation - hidden on fullscreen pages */}
-        {!isFullscreenPage && (
-          <Navbar currentPage={currentPage} onNavigate={navigate} />
-        )}
+      <Routes>
+        {/* Public Pages with full layout */}
+        <Route path="/" element={<Layout><Home /></Layout>} />
+        <Route path="/features" element={<Layout><Features /></Layout>} />
+        <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+        <Route path="/about" element={<Layout><About /></Layout>} />
+        <Route path="/contact" element={<Layout><Contact onShowToast={toast.addToast} /></Layout>} />
+        <Route path="/enterprise" element={<Layout><Enterprise onShowToast={toast.addToast} /></Layout>} />
+        <Route path="/help" element={<Layout><Help /></Layout>} />
+        <Route path="/terms" element={<Layout><Terms /></Layout>} />
+        <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
 
-        {/* Main Content with transition */}
-        <main
-          className={`
-            flex-grow transition-all duration-200
-            ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}
-          `}
-        >
-          {renderPage()}
-        </main>
+        {/* Auth Pages - no footer */}
+        <Route path="/login" element={<Layout hideFooter><Login onShowToast={toast.addToast} /></Layout>} />
+        <Route path="/signup" element={<Layout hideFooter><Signup onShowToast={toast.addToast} /></Layout>} />
+        <Route path="/forgot-password" element={<Layout hideFooter><ForgotPassword onShowToast={toast.addToast} /></Layout>} />
 
-        {/* Footer - hidden on fullscreen and auth pages */}
-        {!isFullscreenPage && !isAuthPage && (
-          <Footer onNavigate={navigate} />
-        )}
-      </div>
-    </AppProvider>
+        {/* Protected Pages - no navbar/footer */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout hideNavbar hideFooter>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 */}
+        <Route path="*" element={<Layout><NotFound /></Layout>} />
+      </Routes>
+    </>
+  );
+};
+
+// ============================================
+// Main App Component
+// ============================================
+
+export default function App() {
+  const toast = useToast();
+
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppProvider>
+          <div className="font-sans text-zinc-300 bg-black overflow-x-hidden min-h-screen flex flex-col noise-overlay">
+            {/* Toast Notifications */}
+            <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
+
+            {/* Routes */}
+            <AppRoutes />
+          </div>
+        </AppProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

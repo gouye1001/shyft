@@ -1,19 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { Page } from '../App';
+import { Link, useNavigate } from 'react-router-dom';
 import FormInput from '../components/FormInput';
 import MagneticButton from '../components/MagneticButton';
 
 interface ForgotPasswordProps {
-    onNavigate: (page: Page) => void;
     onShowToast?: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate, onShowToast }) => {
+const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onShowToast }) => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -74,7 +74,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate, onShowToast
                                 <MagneticButton
                                     variant="primary"
                                     size="md"
-                                    onClick={() => onNavigate('login')}
+                                    onClick={() => navigate('/login')}
                                     className="w-full"
                                 >
                                     Back to Login
@@ -123,13 +123,13 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate, onShowToast
                                 </MagneticButton>
                             </form>
 
-                            <button
-                                onClick={() => onNavigate('login')}
+                            <Link
+                                to="/login"
                                 className="mt-8 w-full text-center text-sm text-zinc-500 hover:text-white transition-colors flex items-center justify-center gap-2 group"
                             >
                                 <i className="fa-solid fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform" />
                                 Back to login
-                            </button>
+                            </Link>
                         </>
                     )}
                 </div>

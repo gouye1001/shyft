@@ -1,11 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Page } from '../App';
+import { Link } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 import FormInput from '../components/FormInput';
 import MagneticButton from '../components/MagneticButton';
 
 interface EnterpriseProps {
-    onNavigate: (page: Page) => void;
     onShowToast?: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
@@ -49,7 +48,7 @@ const faqs = [
     { q: 'Do you offer data migration?', a: 'Yes, we provide full data migration assistance from your existing systems at no extra cost.' }
 ];
 
-const Enterprise: React.FC<EnterpriseProps> = ({ onNavigate, onShowToast }) => {
+const Enterprise: React.FC<EnterpriseProps> = ({ onShowToast }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [company, setCompany] = useState('');
@@ -292,18 +291,18 @@ const Enterprise: React.FC<EnterpriseProps> = ({ onNavigate, onShowToast }) => {
                                 Join hundreds of enterprises already using Shyft to streamline their field operations.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <button
-                                    onClick={() => onNavigate('pricing')}
-                                    className="px-8 py-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-all"
+                                <Link
+                                    to="/pricing"
+                                    className="px-8 py-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-all text-center"
                                 >
                                     View Pricing
-                                </button>
-                                <button
-                                    onClick={() => onNavigate('contact')}
-                                    className="px-8 py-4 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 transition-all"
+                                </Link>
+                                <Link
+                                    to="/contact"
+                                    className="px-8 py-4 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 transition-all text-center"
                                 >
                                     Contact Sales
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     </div>

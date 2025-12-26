@@ -1,20 +1,27 @@
 import React, { useState, useRef } from 'react';
-import { Page } from '../App';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import FormInput from '../components/FormInput';
 import MagneticButton from '../components/MagneticButton';
+import { useAuth } from '../src/context/AuthContext';
 
 interface LoginProps {
-    onNavigate: (page: Page) => void;
     onShowToast?: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onNavigate, onShowToast }) => {
+const Login: React.FC<LoginProps> = ({ onShowToast }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
     const [isLoading, setIsLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { login } = useAuth();
+
+    // Get redirect destination from location state or default to dashboard
+    const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -52,14 +59,21 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onShowToast }) => {
 
         setIsLoading(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const result = await login(email, password);
 
-        // Demo: navigate to dashboard
-        onShowToast?.('success', 'Welcome back! Redirecting to dashboard...');
-        setTimeout(() => onNavigate('dashboard'), 1000);
-
-        setIsLoading(false);
+            if (result.success) {
+                onShowToast?.('success', 'Welcome back! Redirecting to dashboard...');
+                setTimeout(() => navigate(from, { replace: true }), 500);
+            } else {
+                onShowToast?.('error', result.error || 'Login failed');
+                setErrors({ password: result.error });
+            }
+        } catch {
+            onShowToast?.('error', 'An unexpected error occurred');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -79,6 +93,14 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onShowToast }) => {
                         </div>
                         <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">Welcome back</h1>
                         <p className="text-zinc-300">Sign in to your Shyft workspace</p>
+                    </div>
+
+                    {/* Demo Credentials Notice */}
+                    <div className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                        <p className="text-sm text-blue-300 text-center">
+                            <i className="fa-solid fa-info-circle mr-2" />
+                            Demo: <code className="bg-blue-500/20 px-2 py-0.5 rounded">demo@shyft.io</code> / <code className="bg-blue-500/20 px-2 py-0.5 rounded">demo123</code>
+                        </p>
                     </div>
 
                     {/* Social Login */}
@@ -149,13 +171,12 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onShowToast }) => {
                                     Remember me
                                 </span>
                             </label>
-                            <button
-                                type="button"
-                                onClick={() => onNavigate('forgotPassword')}
+                            <Link
+                                to="/forgot-password"
                                 className="text-sm text-zinc-400 hover:text-white transition-colors"
                             >
                                 Forgot password?
-                            </button>
+                            </Link>
                         </div>
 
                         <MagneticButton
@@ -171,12 +192,12 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onShowToast }) => {
 
                     <div className="mt-8 text-center text-sm text-zinc-500">
                         Don't have an account?{' '}
-                        <button
-                            onClick={() => onNavigate('signup')}
+                        <Link
+                            to="/signup"
                             className="text-white hover:text-blue-400 transition-colors font-medium"
                         >
                             Start free trial
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

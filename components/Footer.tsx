@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
-import { Page } from '../App';
+import { Link } from 'react-router-dom';
 
-interface FooterProps {
-    onNavigate: (page: Page) => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+const Footer: React.FC = () => {
     const [email, setEmail] = useState('');
     const [isSubscribed, setIsSubscribed] = useState(false);
 
@@ -22,26 +18,26 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
     const footerLinks = {
         Product: [
-            { label: 'Features', page: 'features' as Page },
-            { label: 'Pricing', page: 'pricing' as Page },
-            { label: 'Dashboard Demo', page: 'dashboard' as Page },
+            { label: 'Features', path: '/features' },
+            { label: 'Pricing', path: '/pricing' },
+            { label: 'Dashboard Demo', path: '/dashboard' },
             { label: 'API Docs', external: true },
         ],
         Company: [
-            { label: 'About', page: 'about' as Page },
+            { label: 'About', path: '/about' },
             { label: 'Careers', external: true },
             { label: 'Blog', external: true },
             { label: 'Press', external: true },
         ],
         Resources: [
             { label: 'Help Center', external: true },
-            { label: 'Contact', page: 'contact' as Page },
+            { label: 'Contact', path: '/contact' },
             { label: 'Community', external: true },
             { label: 'Status', external: true },
         ],
         Legal: [
-            { label: 'Privacy', page: 'privacy' as Page },
-            { label: 'Terms', page: 'terms' as Page },
+            { label: 'Privacy', path: '/privacy' },
+            { label: 'Terms', path: '/terms' },
             { label: 'Security', external: true },
             { label: 'Cookies', external: true },
         ],
@@ -90,9 +86,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-12 py-16">
                     {/* Brand */}
                     <div className="col-span-2 md:col-span-1">
-                        <div
-                            className="flex items-center gap-2.5 cursor-pointer group mb-6"
-                            onClick={() => onNavigate('home')}
+                        <Link
+                            to="/"
+                            className="flex items-center gap-2.5 group mb-6"
                         >
                             <div className="w-9 h-9 rounded-xl bg-brand-surface border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <svg viewBox="0 0 32 32" fill="none" className="w-[60%] h-[60%]">
@@ -101,7 +97,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                                 </svg>
                             </div>
                             <span className="font-bold text-lg text-white">Shyft</span>
-                        </div>
+                        </Link>
                         <p className="text-sm text-zinc-500 mb-6">
                             The modern platform for field service management.
                         </p>
@@ -136,12 +132,12 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                                                 <i className="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-50" />
                                             </a>
                                         ) : (
-                                            <button
-                                                onClick={() => link.page && onNavigate(link.page)}
+                                            <Link
+                                                to={link.path || '/'}
                                                 className="text-sm text-zinc-400 hover:text-white transition-colors"
                                             >
                                                 {link.label}
-                                            </button>
+                                            </Link>
                                         )}
                                     </li>
                                 ))}

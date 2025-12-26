@@ -1,15 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { Page } from '../App';
+import { Link, useNavigate } from 'react-router-dom';
 import FormInput from '../components/FormInput';
 import MagneticButton from '../components/MagneticButton';
 import PasswordStrength from '../components/PasswordStrength';
+import { useAuth } from '../src/context/AuthContext';
 
 interface SignupProps {
-    onNavigate: (page: Page) => void;
     onShowToast?: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const Signup: React.FC<SignupProps> = ({ onNavigate, onShowToast }) => {
+const Signup: React.FC<SignupProps> = ({ onShowToast }) => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -20,6 +20,9 @@ const Signup: React.FC<SignupProps> = ({ onNavigate, onShowToast }) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const navigate = useNavigate();
+    const { signup } = useAuth();
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -64,12 +67,23 @@ const Signup: React.FC<SignupProps> = ({ onNavigate, onShowToast }) => {
         if (!validateForm()) return;
 
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        onShowToast?.('success', 'Account created! Welcome to Shyft.');
-        setTimeout(() => onNavigate('dashboard'), 1000);
+        try {
+            const fullName = `${firstName} ${lastName}`.trim();
+            const result = await signup(fullName, email, password);
 
-        setIsLoading(false);
+            if (result.success) {
+                onShowToast?.('success', 'Account created! Welcome to Shyft.');
+                setTimeout(() => navigate('/dashboard', { replace: true }), 500);
+            } else {
+                onShowToast?.('error', result.error || 'Signup failed');
+                setErrors({ email: result.error || 'Signup failed' });
+            }
+        } catch {
+            onShowToast?.('error', 'An unexpected error occurred');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -199,9 +213,9 @@ const Signup: React.FC<SignupProps> = ({ onNavigate, onShowToast }) => {
                             </div>
                             <span className="text-sm text-zinc-300">
                                 I agree to the{' '}
-                                <button type="button" onClick={() => onNavigate('terms')} className="text-white hover:underline">Terms of Service</button>
+                                <Link to="/terms" className="text-white hover:underline">Terms of Service</Link>
                                 {' '}and{' '}
-                                <button type="button" onClick={() => onNavigate('privacy')} className="text-white hover:underline">Privacy Policy</button>
+                                <Link to="/privacy" className="text-white hover:underline">Privacy Policy</Link>
                             </span>
                         </label>
                         {errors.terms && (
@@ -224,12 +238,12 @@ const Signup: React.FC<SignupProps> = ({ onNavigate, onShowToast }) => {
 
                     <div className="mt-8 text-center text-sm text-zinc-500">
                         Already have an account?{' '}
-                        <button
-                            onClick={() => onNavigate('login')}
+                        <Link
+                            to="/login"
                             className="text-white hover:text-blue-400 transition-colors font-medium"
                         >
                             Log in
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

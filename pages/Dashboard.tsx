@@ -1,17 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Page } from '../App';
+import { useNavigate, Link } from 'react-router-dom';
 import { AnimatedCounter } from '../components/GradientText';
 import { mockJobs, mockTeam, mockStats } from '../src/utils/mockData';
+import { useAuth } from '../src/context/AuthContext';
 
-interface DashboardProps {
-    onNavigate: (page: Page) => void;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+const Dashboard: React.FC = () => {
     const [selectedJob, setSelectedJob] = useState<number | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [sidebarTab, setSidebarTab] = useState<'jobs' | 'team'>('jobs');
+    const [showSettings, setShowSettings] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const navigate = useNavigate();
+    const { user, logout, updateUser } = useAuth();
+
+    // Settings state
+    const [settingsName, setSettingsName] = useState(user?.name || '');
+    const [settingsEmail, setSettingsEmail] = useState(user?.email || '');
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    const handleSaveSettings = () => {
+        updateUser({ name: settingsName, email: settingsEmail });
+        setShowSettings(false);
+    };
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -60,12 +75,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 border-y border-white/5 py-2 px-6 text-center backdrop-blur-md relative z-20">
                 <span className="text-xs md:text-sm text-zinc-300 flex items-center justify-center gap-2">
                     <i className="fa-solid fa-sparkles text-amber-400" />
-                    Interactive Demo Mode
+                    Logged in as {user?.name || 'User'}
+                    <span className="mx-2 w-px h-4 bg-white/10" />
                     <button
-                        onClick={() => onNavigate('signup')}
-                        className="ml-2 text-white font-medium hover:text-blue-400 transition-colors"
+                        onClick={handleLogout}
+                        className="text-red-400 hover:text-red-300 font-medium transition-colors"
                     >
-                        Start your free trial →
+                        <i className="fa-solid fa-right-from-bracket mr-1" />
+                        Logout
                     </button>
                 </span>
             </div>
@@ -77,12 +94,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <div className="p-6 border-b border-white/5">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <span className="text-white font-bold text-lg">S</span>
+                                <span className="text-white font-bold text-lg">{user?.name?.charAt(0) || 'U'}</span>
                             </div>
-                            <div>
-                                <div className="text-white font-semibold tracking-tight">Acme Services</div>
-                                <div className="text-xs text-zinc-500 font-medium">Pro Plan</div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-white font-semibold tracking-tight truncate">{user?.name || 'User'}</div>
+                                <div className="text-xs text-zinc-500 font-medium truncate">{user?.email || 'Pro Plan'}</div>
                             </div>
+                            <button
+                                onClick={() => setShowSettings(true)}
+                                className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                            >
+                                <i className="fa-solid fa-gear" />
+                            </button>
                         </div>
                     </div>
 
@@ -137,7 +160,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <div className="flex justify-between items-end mb-8">
                         <div>
                             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                                Good {currentTime.getHours() < 12 ? 'morning' : currentTime.getHours() < 18 ? 'afternoon' : 'evening'}, Alex
+                                Good {currentTime.getHours() < 12 ? 'morning' : currentTime.getHours() < 18 ? 'afternoon' : 'evening'}, {user?.name?.split(' ')[0] || 'there'}
                             </h1>
                             <p className="text-zinc-400 flex items-center gap-2">
                                 <i className="fa-regular fa-calendar text-zinc-500" />

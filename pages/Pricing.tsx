@@ -1,14 +1,13 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
-import { Page } from '../App';
+import { useAuth } from '../src/context/AuthContext';
 
-interface PricingProps {
-    onNavigate?: (page: Page) => void;
-}
-
-const Pricing: React.FC<PricingProps> = ({ onNavigate }) => {
+const Pricing: React.FC = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const containerRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -198,11 +197,10 @@ const Pricing: React.FC<PricingProps> = ({ onNavigate }) => {
                                 <button
                                     onClick={() => {
                                         if (plan.name === 'Enterprise') {
-                                            onNavigate?.('enterprise');
-                                        } else if (plan.name === 'Starter') {
-                                            onNavigate?.('signup');
+                                            navigate('/enterprise');
                                         } else {
-                                            onNavigate?.('signup');
+                                            // If authenticated, go to dashboard, otherwise signup
+                                            navigate(isAuthenticated ? '/dashboard' : '/signup');
                                         }
                                     }}
                                     className={`
