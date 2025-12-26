@@ -1,7 +1,12 @@
 import React from 'react';
 import ScrollReveal from './ScrollReveal';
+import { Page } from '../App';
 
-const PricingSection: React.FC = () => {
+interface PricingSectionProps {
+    onNavigate?: (page: Page) => void;
+}
+
+const PricingSection: React.FC<PricingSectionProps> = ({ onNavigate }) => {
     return (
         <section id="pricing" className="py-32 bg-black border-t border-white/5">
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -40,7 +45,7 @@ const PricingSection: React.FC = () => {
 
                     {/* Pro - Subtle highlight */}
                     <div className="p-8 rounded-3xl border border-white/10 bg-zinc-900/40 flex flex-col relative">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-white/10 backdrop-blur-md text-white text-xs font-medium rounded-full border border-white/10">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-zinc-900 text-white text-[10px] font-medium uppercase tracking-wider rounded-full border border-white/20">
                             Popular
                         </div>
                         <div className="mb-8 mt-2">
@@ -73,7 +78,12 @@ const PricingSection: React.FC = () => {
                             <li className="flex gap-3"><span className="text-zinc-500">✓</span> Dedicated Support</li>
                             <li className="flex gap-3"><span className="text-zinc-500">✓</span> Custom API</li>
                         </ul>
-                        <button className="w-full py-3 rounded-full border border-white/10 text-zinc-400 font-medium hover:bg-white/5 hover:text-white transition-all">Contact Us</button>
+                        <button
+                            onClick={() => onNavigate?.('enterprise')}
+                            className="w-full py-3 rounded-full border border-white/10 text-zinc-400 font-medium hover:bg-white/5 hover:text-white transition-all"
+                        >
+                            Contact Sales
+                        </button>
                     </div>
                 </div>
             </div>

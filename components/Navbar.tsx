@@ -38,7 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     { label: 'Product', page: 'features' as Page },
     { label: 'Solutions', page: 'about' as Page },
     { label: 'Pricing', page: 'pricing' as Page },
-    { label: 'Enterprise', page: 'contact' as Page },
+    { label: 'Enterprise', page: 'enterprise' as Page },
   ];
 
   return (

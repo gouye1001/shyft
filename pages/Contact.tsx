@@ -23,7 +23,6 @@ const Contact: React.FC<ContactProps> = ({ onNavigate, onShowToast }) => {
     const [message, setMessage] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -188,34 +187,15 @@ const Contact: React.FC<ContactProps> = ({ onNavigate, onShowToast }) => {
                             </div>
                         </ScrollReveal>
 
-                        {/* FAQ */}
+                        {/* FAQ - Grid style matching Pricing page */}
                         <ScrollReveal delay="200">
                             <div>
                                 <h2 className="text-2xl font-bold text-white mb-8">FAQ</h2>
-                                <div className="space-y-4">
+                                <div className="grid gap-6">
                                     {faqs.map((faq, i) => (
-                                        <div
-                                            key={i}
-                                            className={`rounded-2xl border transition-all duration-300 overflow-hidden ${expandedFaq === i
-                                                ? 'bg-zinc-900/50 border-white/20'
-                                                : 'bg-zinc-900/20 border-white/5 hover:border-white/10'
-                                                }`}
-                                        >
-                                            <button
-                                                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                                                className="w-full flex items-center justify-between p-6 text-left"
-                                            >
-                                                <span className="text-white font-medium text-lg pr-4">{faq.q}</span>
-                                                <i className={`fa-solid fa-chevron-down text-zinc-500 transition-transform duration-300 ${expandedFaq === i ? 'rotate-180 text-white' : ''}`} />
-                                            </button>
-                                            <div
-                                                className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedFaq === i ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
-                                                    }`}
-                                            >
-                                                <div className="px-6 pb-6 text-zinc-300 leading-relaxed border-t border-white/5 pt-4">
-                                                    {faq.a}
-                                                </div>
-                                            </div>
+                                        <div key={i} className="card-spotlight p-6 rounded-2xl bg-zinc-900/30 border border-white/10 hover:border-white/20 transition-all">
+                                            <h4 className="text-white font-bold mb-2">{faq.q}</h4>
+                                            <p className="text-zinc-400 text-sm leading-relaxed">{faq.a}</p>
                                         </div>
                                     ))}
                                 </div>

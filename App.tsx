@@ -10,13 +10,14 @@ import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Enterprise from './pages/Enterprise';
 import Help from './pages/Help';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import { ToastContainer, useToast } from './components/Toast';
 import { AppProvider } from './src/context/AppContext';
 
-export type Page = 'home' | 'features' | 'pricing' | 'login' | 'signup' | 'dashboard' | 'forgotPassword' | 'about' | 'contact' | 'help' | 'terms' | 'privacy';
+export type Page = 'home' | 'features' | 'pricing' | 'login' | 'signup' | 'dashboard' | 'forgotPassword' | 'about' | 'contact' | 'enterprise' | 'help' | 'terms' | 'privacy';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -51,13 +52,14 @@ export default function App() {
     switch (currentPage) {
       case 'home': return <Home onNavigate={navigate} />;
       case 'features': return <Features />;
-      case 'pricing': return <Pricing />;
+      case 'pricing': return <Pricing onNavigate={navigate} />;
       case 'login': return <Login {...pageProps} />;
       case 'signup': return <Signup {...pageProps} />;
       case 'dashboard': return <Dashboard onNavigate={navigate} />;
       case 'forgotPassword': return <ForgotPassword {...pageProps} />;
       case 'about': return <About onNavigate={navigate} />;
       case 'contact': return <Contact onNavigate={navigate} onShowToast={toast.addToast} />;
+      case 'enterprise': return <Enterprise onNavigate={navigate} onShowToast={toast.addToast} />;
       case 'help': return <Help />;
       case 'terms': return <Terms />;
       case 'privacy': return <Privacy />;

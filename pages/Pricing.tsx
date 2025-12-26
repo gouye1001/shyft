@@ -1,7 +1,12 @@
 import React, { useState, useRef } from 'react';
 import ScrollReveal from '../components/ScrollReveal';
+import { Page } from '../App';
 
-const Pricing: React.FC = () => {
+interface PricingProps {
+    onNavigate?: (page: Page) => void;
+}
+
+const Pricing: React.FC<PricingProps> = ({ onNavigate }) => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -130,39 +135,51 @@ const Pricing: React.FC = () => {
                                     : 'bg-zinc-950/30 border-white/5 hover:border-white/10'
                                 }
                             `}>
-                                {plan.popular && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-white/10 backdrop-blur-md text-white text-xs font-medium uppercase tracking-wider rounded-full border border-white/10">
-                                        Popular
-                                    </div>
-                                )}
-                                <div className="mb-8">
+                                {/* Header with optional Popular badge */}
+                                <div className="mb-6">
+                                    {plan.popular && (
+                                        <span className="inline-block px-3 py-1 mb-4 bg-white/10 text-white text-[10px] font-medium uppercase tracking-wider rounded-full border border-white/20">
+                                            Popular
+                                        </span>
+                                    )}
                                     <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
                                     <p className="text-sm text-zinc-400 font-medium">{plan.description}</p>
                                 </div>
 
-                                <div className="text-4xl font-bold text-white mb-2 tracking-tight">
+                                {/* Price display */}
+                                <div className="mb-2">
                                     {plan.price === null ? (
-                                        <span className="text-zinc-300">Custom</span>
+                                        <span className="text-3xl font-semibold text-zinc-300">Custom</span>
                                     ) : plan.price === 0 ? (
-                                        <span className="text-zinc-400 text-3xl font-semibold">Free</span>
+                                        <>
+                                            <span className="text-3xl font-semibold text-zinc-400">Free</span>
+                                            <span className="text-lg text-zinc-500 font-normal ml-1">{plan.period}</span>
+                                        </>
                                     ) : (
                                         <>
-                                            ${getPrice(plan.price)}
-                                            {billingCycle === 'annual' && plan.price > 0 && (
+                                            <span className="text-4xl font-bold text-white tracking-tight">
+                                                ${getPrice(plan.price)}
+                                            </span>
+                                            {billingCycle === 'annual' && (
                                                 <span className="text-xl text-zinc-500 font-normal line-through ml-3 decoration-zinc-600">
                                                     ${plan.price}
                                                 </span>
                                             )}
+                                            <span className="text-lg text-zinc-500 font-normal ml-1">{plan.period}</span>
                                         </>
                                     )}
-                                    <span className="text-lg text-zinc-500 font-normal ml-1">{plan.period}</span>
                                 </div>
-                                {billingCycle === 'annual' && plan.price && plan.price > 0 && (
-                                    <div className="text-sm text-emerald-400 font-medium mb-8 bg-emerald-500/10 inline-block px-3 py-1 rounded-full border border-emerald-500/20">
+
+                                {/* Savings badge or subtitle */}
+                                {billingCycle === 'annual' && plan.price !== null && plan.price > 0 ? (
+                                    <div className="text-sm text-emerald-400 font-medium mb-6 bg-emerald-500/10 inline-block px-3 py-1 rounded-full border border-emerald-500/20">
                                         Save ${(plan.price - getPrice(plan.price)) * 12}/year
                                     </div>
+                                ) : (
+                                    <p className="text-sm text-zinc-500 mb-6">
+                                        {plan.price === 0 ? 'No credit card required' : plan.price === null ? 'Tailored to your needs' : 'Billed monthly'}
+                                    </p>
                                 )}
-                                {!plan.price && <div className="mb-8 h-7" />}
 
                                 <div className="flex-grow">
                                     <div className="h-px w-full bg-white/10 mb-8" />
@@ -178,12 +195,22 @@ const Pricing: React.FC = () => {
                                     </ul>
                                 </div>
 
-                                <button className={`
+                                <button
+                                    onClick={() => {
+                                        if (plan.name === 'Enterprise') {
+                                            onNavigate?.('enterprise');
+                                        } else if (plan.name === 'Starter') {
+                                            onNavigate?.('signup');
+                                        } else {
+                                            onNavigate?.('signup');
+                                        }
+                                    }}
+                                    className={`
                                     w-full py-4 rounded-xl font-bold transition-all text-sm uppercase tracking-wide
                                     ${plan.popular
-                                        ? 'bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/20 hover:-translate-y-1'
-                                        : 'bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black hover:-translate-y-1'
-                                    }
+                                            ? 'bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/20 hover:-translate-y-1'
+                                            : 'bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black hover:-translate-y-1'
+                                        }
                                 `}>
                                     {plan.cta}
                                 </button>
