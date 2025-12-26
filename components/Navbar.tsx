@@ -23,12 +23,16 @@ const navLinks: NavLink[] = [
 // Navbar Component
 // ============================================
 
+// ============================================
+// Navbar Component
+// ============================================
+
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
     let ticking = false;
@@ -55,6 +59,12 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Handle Logout
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -102,22 +112,18 @@ const Navbar: React.FC = () => {
             <div className="hidden md:flex items-center gap-2">
               {isAuthenticated ? (
                 <>
+                  <button
+                    onClick={handleLogout}
+                    className="nav-item text-zinc-400 hover:text-white font-medium transition-all border border-transparent hover:border-white/10 rounded-full whitespace-nowrap"
+                  >
+                    Log Out
+                  </button>
                   <Link
                     to="/dashboard"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                    className="nav-cta bg-white text-black font-semibold rounded-full hover:bg-zinc-100 transition-colors whitespace-nowrap flex items-center gap-2"
                   >
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                      {(user?.name?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
-                    </div>
-                    <span className="text-zinc-300 text-sm max-w-[100px] truncate">
-                      {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}
-                    </span>
-                  </Link>
-                  <Link
-                    to="/dashboard"
-                    className="nav-cta bg-white text-black font-semibold rounded-full hover:bg-zinc-100 transition-colors whitespace-nowrap"
-                  >
-                    Dashboard
+                    <span>Go to Dashboard</span>
+                    <i className="fa-solid fa-arrow-right text-xs" />
                   </Link>
                 </>
               ) : (
@@ -191,12 +197,24 @@ const Navbar: React.FC = () => {
           <div className="w-16 h-px bg-white/10 my-4" />
 
           {isAuthenticated ? (
-            <button
-              onClick={() => { setIsMobileMenuOpen(false); navigate('/dashboard'); }}
-              className="px-8 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-colors"
-            >
-              Go to Dashboard
-            </button>
+            <div className="flex flex-col gap-4 w-full max-w-xs">
+              <Link
+                to="/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-8 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-colors text-center"
+              >
+                Go to Dashboard
+              </Link>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-lg text-zinc-400 hover:text-white transition-colors"
+              >
+                Log Out
+              </button>
+            </div>
           ) : (
             <>
               <Link

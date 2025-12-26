@@ -71,24 +71,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Restore session from localStorage ONLY (no API calls)
     useEffect(() => {
         const restoreSession = () => {
-            // Check for tokens in URL (cross-subdomain transfer)
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlAccessToken = urlParams.get('access_token');
-            const urlRefreshToken = urlParams.get('refresh_token');
+            try {
+                // Check for tokens in URL (cross-subdomain transfer)
+                // Note: We're keeping this strictly for legacy support/safety, 
+                // even though we are moving to a single domain model.
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlAccessToken = urlParams.get('access_token');
+                const urlRefreshToken = urlParams.get('refresh_token');
 
-            if (urlAccessToken && urlRefreshToken) {
-                // Save tokens from URL and clean up the URL
-                localStorage.setItem('access_token', urlAccessToken);
-                localStorage.setItem('refresh_token', urlRefreshToken);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+                if (urlAccessToken && urlRefreshToken) {
+                    localStorage.setItem('access_token', urlAccessToken);
+                    localStorage.setItem('refresh_token', urlRefreshToken);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
 
-            // Check for stored auth
-            const storedAuth = localStorage.getItem('shyft_auth');
-            const hasToken = localStorage.getItem('access_token');
+                // Check for stored auth
+                const storedAuth = localStorage.getItem('shyft_auth');
+                const hasToken = localStorage.getItem('access_token');
 
-            if (storedAuth && hasToken) {
-                try {
+                if (storedAuth && hasToken) {
                     const user = JSON.parse(storedAuth) as User;
                     setState({
                         user,
@@ -96,12 +97,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                         isLoading: false,
                     });
                     return;
-                } catch {
-                    localStorage.removeItem('shyft_auth');
                 }
+            } catch (error) {
+                console.error('Failed to restore session:', error);
+                localStorage.removeItem('shyft_auth');
             }
 
-            // No valid session
+            // No valid session found
             setState({ user: null, isAuthenticated: false, isLoading: false });
         };
 
