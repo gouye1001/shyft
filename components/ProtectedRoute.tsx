@@ -4,34 +4,92 @@ import { useAuth } from '../src/context/AuthContext';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    redirectTo?: string;
+    requiredRole?: 'admin' | 'dispatcher' | 'technician';
+    adminOnly?: boolean;
 }
 
 /**
- * ProtectedRoute wrapper - redirects to login if user is not authenticated
+ * ProtectedRoute - Role-based access control wrapper
+ * 
+ * Usage:
+ * - <ProtectedRoute>{children}</ProtectedRoute> - Requires authentication
+ * - <ProtectedRoute adminOnly>{children}</ProtectedRoute> - Requires admin role
+ * - <ProtectedRoute requiredRole="dispatcher">{children}</ProtectedRoute> - Requires specific role
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
-    redirectTo = '/login'
+    requiredRole,
+    adminOnly = false,
 }) => {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const location = useLocation();
 
-    // Show nothing while checking auth state
+    // Show loading state
     if (isLoading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <p className="text-zinc-400 text-sm">Loading...</p>
+                <div className="flex items-center gap-3 text-zinc-400">
+                    <i className="fa-solid fa-spinner fa-spin text-xl" />
+                    <span>Loading...</span>
                 </div>
             </div>
         );
     }
 
+    // Redirect to login if not authenticated
     if (!isAuthenticated) {
-        // Redirect to login, preserving the intended destination
-        return <Navigate to={redirectTo} state={{ from: location }} replace />;
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    // Get user role with fallback
+    const userRole = user?.role || 'technician';
+
+    // Check admin-only routes
+    if (adminOnly && userRole !== 'admin' && userRole !== 'owner') {
+        console.warn(`[ProtectedRoute] User ${user?.email} (${userRole}) tried to access admin-only route: ${location.pathname}`);
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-8">
+                <div className="text-center max-w-md">
+                    <div className="w-20 h-20 mx-auto rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
+                        <i className="fa-solid fa-shield-halved text-3xl text-red-400" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
+                    <p className="text-zinc-400 mb-6">
+                        You don't have permission to access this page. Admin privileges are required.
+                    </p>
+                    <button
+                        onClick={() => window.history.back()}
+                        className="px-6 py-3 rounded-xl bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Check required role
+    if (requiredRole && userRole !== requiredRole && userRole !== 'admin') {
+        console.warn(`[ProtectedRoute] User ${user?.email} (${userRole}) tried to access route requiring ${requiredRole}: ${location.pathname}`);
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-8">
+                <div className="text-center max-w-md">
+                    <div className="w-20 h-20 mx-auto rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center mb-6">
+                        <i className="fa-solid fa-lock text-3xl text-yellow-400" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Restricted Access</h1>
+                    <p className="text-zinc-400 mb-6">
+                        This page requires {requiredRole} privileges. Your current role is {userRole}.
+                    </p>
+                    <button
+                        onClick={() => window.history.back()}
+                        className="px-6 py-3 rounded-xl bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     return <>{children}</>;
