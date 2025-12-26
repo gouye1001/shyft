@@ -2,25 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Page } from '../App';
 import ScrollReveal from '../components/ScrollReveal';
 import GradientText, { AnimatedCounter } from '../components/GradientText';
+import { mockJobs, mockTeam, mockStats } from '../src/utils/mockData';
+import type { Job, TeamMember } from '../src/utils/mockData';
 
 interface DashboardProps {
     onNavigate: (page: Page) => void;
 }
 
-// Simulated data
-const mockJobs = [
-    { id: 1, customer: 'Acme Corp', address: '1240 Market St', tech: 'Mike S.', status: 'in-progress', time: '10:30 AM', priority: 'high' },
-    { id: 2, customer: 'TechStart Inc', address: '789 Innovation Way', tech: 'Sarah K.', status: 'scheduled', time: '1:00 PM', priority: 'medium' },
-    { id: 3, customer: 'Global Systems', address: '456 Enterprise Blvd', tech: 'John D.', status: 'completed', time: '9:00 AM', priority: 'low' },
-    { id: 4, customer: 'Local Business', address: '123 Main St', tech: 'Emily R.', status: 'scheduled', time: '3:30 PM', priority: 'medium' },
-];
-
-const mockTeam = [
-    { id: 1, name: 'Mike S.', role: 'Senior Tech', status: 'on-job', avatar: 'MS', color: 'blue' },
-    { id: 2, name: 'Sarah K.', role: 'Technician', status: 'available', avatar: 'SK', color: 'emerald' },
-    { id: 3, name: 'John D.', role: 'Lead Tech', status: 'break', avatar: 'JD', color: 'purple' },
-    { id: 4, name: 'Emily R.', role: 'Technician', status: 'driving', avatar: 'ER', color: 'cyan' },
-];
 
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     const [selectedJob, setSelectedJob] = useState<number | null>(null);
@@ -112,14 +100,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                         <div className="bg-zinc-900/50 rounded-xl p-4 space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-zinc-500">Today's Revenue</span>
-                                <span className="text-emerald-400 font-medium">+$2,340</span>
+                                <span className="text-emerald-400 font-medium">+${mockStats.todayRevenue.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-zinc-500">Completed Jobs</span>
-                                <span className="text-white font-medium">8/12</span>
+                                <span className="text-white font-medium">{mockStats.jobsCompletedToday}/{mockStats.jobsScheduledToday}</span>
                             </div>
                             <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full w-2/3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" />
+                                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style={{ width: `${(mockStats.jobsCompletedToday / mockStats.jobsScheduledToday) * 100}%` }} />
                             </div>
                         </div>
                     </div>
@@ -153,10 +141,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-4 gap-6 mb-8">
                         {[
-                            { label: 'Revenue Today', value: 2340, prefix: '$', color: 'emerald', icon: 'fa-dollar-sign', change: '+12%' },
-                            { label: 'Active Jobs', value: 4, color: 'blue', icon: 'fa-briefcase', change: '' },
-                            { label: 'Team On Field', value: 3, color: 'purple', icon: 'fa-users', suffix: '/4' },
-                            { label: 'Avg Response', value: 24, suffix: 'min', color: 'cyan', icon: 'fa-clock', change: '-8%' },
+                            { label: 'Revenue Today', value: mockStats.todayRevenue, prefix: '$', color: 'emerald', icon: 'fa-dollar-sign', change: '+12%' },
+                            { label: 'Active Jobs', value: mockStats.activeJobs, color: 'blue', icon: 'fa-briefcase', change: '' },
+                            { label: 'Team On Field', value: mockStats.teamOnField, color: 'purple', icon: 'fa-users', suffix: `/${mockStats.totalTeam}` },
+                            { label: 'Avg Response', value: mockStats.avgResponseTime, suffix: 'min', color: 'cyan', icon: 'fa-clock', change: '-8%' },
                         ].map((stat, i) => (
                             <div
                                 key={i}
@@ -242,8 +230,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                                 <button
                                     onClick={() => setSidebarTab('jobs')}
                                     className={`px-4 py-1.5 text-xs rounded-full transition-all ${sidebarTab === 'jobs'
-                                            ? 'bg-white text-black'
-                                            : 'text-zinc-400 hover:text-white'
+                                        ? 'bg-white text-black'
+                                        : 'text-zinc-400 hover:text-white'
                                         }`}
                                 >
                                     Jobs
@@ -251,8 +239,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                                 <button
                                     onClick={() => setSidebarTab('team')}
                                     className={`px-4 py-1.5 text-xs rounded-full transition-all ${sidebarTab === 'team'
-                                            ? 'bg-white text-black'
-                                            : 'text-zinc-400 hover:text-white'
+                                        ? 'bg-white text-black'
+                                        : 'text-zinc-400 hover:text-white'
                                         }`}
                                 >
                                     Team

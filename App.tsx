@@ -10,9 +10,13 @@ import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Help from './pages/Help';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import { ToastContainer, useToast } from './components/Toast';
+import { AppProvider } from './src/context/AppContext';
 
-export type Page = 'home' | 'features' | 'pricing' | 'login' | 'signup' | 'dashboard' | 'forgotPassword' | 'about' | 'contact' | 'terms' | 'privacy';
+export type Page = 'home' | 'features' | 'pricing' | 'login' | 'signup' | 'dashboard' | 'forgotPassword' | 'about' | 'contact' | 'help' | 'terms' | 'privacy';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -54,34 +58,39 @@ export default function App() {
       case 'forgotPassword': return <ForgotPassword {...pageProps} />;
       case 'about': return <About onNavigate={navigate} />;
       case 'contact': return <Contact onNavigate={navigate} onShowToast={toast.addToast} />;
+      case 'help': return <Help />;
+      case 'terms': return <Terms />;
+      case 'privacy': return <Privacy />;
       default: return <Home onNavigate={navigate} />;
     }
   };
 
   return (
-    <div className="font-sans text-zinc-400 bg-black overflow-x-hidden min-h-screen flex flex-col noise-overlay">
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
+    <AppProvider>
+      <div className="font-sans text-zinc-400 bg-black overflow-x-hidden min-h-screen flex flex-col noise-overlay">
+        {/* Toast Notifications */}
+        <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
 
-      {/* Navigation - hidden on fullscreen pages */}
-      {!isFullscreenPage && (
-        <Navbar currentPage={currentPage} onNavigate={navigate} />
-      )}
+        {/* Navigation - hidden on fullscreen pages */}
+        {!isFullscreenPage && (
+          <Navbar currentPage={currentPage} onNavigate={navigate} />
+        )}
 
-      {/* Main Content with transition */}
-      <main
-        className={`
-          flex-grow transition-all duration-200
-          ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}
-        `}
-      >
-        {renderPage()}
-      </main>
+        {/* Main Content with transition */}
+        <main
+          className={`
+            flex-grow transition-all duration-200
+            ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}
+          `}
+        >
+          {renderPage()}
+        </main>
 
-      {/* Footer - hidden on fullscreen and auth pages */}
-      {!isFullscreenPage && !isAuthPage && (
-        <Footer onNavigate={navigate} />
-      )}
-    </div>
+        {/* Footer - hidden on fullscreen and auth pages */}
+        {!isFullscreenPage && !isAuthPage && (
+          <Footer onNavigate={navigate} />
+        )}
+      </div>
+    </AppProvider>
   );
 }
