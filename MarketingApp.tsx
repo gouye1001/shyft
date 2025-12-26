@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Pages
@@ -26,7 +26,6 @@ import { useToast } from './components/Toast';
 
 // Auth
 import { useAuth } from './src/context/AuthContext';
-import { getAppUrlWithAuth } from './src/hooks/useSubdomain';
 
 // Layout for marketing pages
 const MarketingLayout: React.FC<{ children: React.ReactNode; hideNavbar?: boolean; hideFooter?: boolean }> = ({
@@ -42,18 +41,11 @@ const MarketingLayout: React.FC<{ children: React.ReactNode; hideNavbar?: boolea
 );
 
 /**
- * AuthRedirect - Redirects authenticated users to the app subdomain
- * Used for pages that authenticated users shouldn't access (login, signup)
+ * GuestOnlyRoute - Redirects authenticated users to /dashboard
+ * Uses React Router Navigate instead of window.location
  */
-const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const GuestOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
-
-    useEffect(() => {
-        if (!isLoading && isAuthenticated) {
-            // Redirect to app subdomain
-            window.location.href = getAppUrlWithAuth();
-        }
-    }, [isAuthenticated, isLoading]);
 
     // Show loading while checking auth
     if (isLoading) {
@@ -67,26 +59,19 @@ const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         );
     }
 
-    // If authenticated, show loading while redirect happens
+    // Redirect authenticated users to dashboard (SPA navigation, no reload)
     if (isAuthenticated) {
-        return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="flex items-center gap-3 text-zinc-400">
-                    <i className="fa-solid fa-spinner fa-spin text-xl" />
-                    <span>Redirecting to dashboard...</span>
-                </div>
-            </div>
-        );
+        return <Navigate to="/dashboard" replace />;
     }
 
     return <>{children}</>;
 };
 
 /**
- * MarketingApp - Public marketing site (shyft.io)
+ * MarketingApp - Public marketing site
  * Contains: Home, Product, Pricing, About, Contact, Login, Signup
  * 
- * Auth pages redirect authenticated users to app subdomain
+ * NO subdomain redirects - pure SPA mode
  */
 const MarketingApp: React.FC = () => {
     const toast = useToast();
@@ -106,24 +91,24 @@ const MarketingApp: React.FC = () => {
             <Route path="/terms" element={<MarketingLayout><Terms /></MarketingLayout>} />
             <Route path="/privacy" element={<MarketingLayout><Privacy /></MarketingLayout>} />
 
-            {/* Auth Pages - Redirect to app if already authenticated */}
+            {/* Auth Pages - Redirect to dashboard if already authenticated */}
             <Route path="/login" element={
-                <AuthRedirect>
+                <GuestOnlyRoute>
                     <MarketingLayout hideFooter><Login onShowToast={toast.addToast} /></MarketingLayout>
-                </AuthRedirect>
+                </GuestOnlyRoute>
             } />
             <Route path="/signup" element={
-                <AuthRedirect>
+                <GuestOnlyRoute>
                     <MarketingLayout hideFooter><Signup onShowToast={toast.addToast} /></MarketingLayout>
-                </AuthRedirect>
+                </GuestOnlyRoute>
             } />
             <Route path="/forgot-password" element={
-                <AuthRedirect>
+                <GuestOnlyRoute>
                     <MarketingLayout hideFooter><ForgotPassword onShowToast={toast.addToast} /></MarketingLayout>
-                </AuthRedirect>
+                </GuestOnlyRoute>
             } />
 
-            {/* Verify Success - This page handles its own redirect */}
+            {/* Verify Success */}
             <Route path="/verify-success" element={<MarketingLayout hideNavbar hideFooter><VerifySuccess /></MarketingLayout>} />
 
             {/* 404 */}
@@ -133,4 +118,3 @@ const MarketingApp: React.FC = () => {
 };
 
 export default MarketingApp;
-

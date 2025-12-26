@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { api } from '../api';
 
 // ============================================
 // Types
@@ -10,7 +9,7 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
-    role?: string;
+    role?: 'admin' | 'owner' | 'dispatcher' | 'technician';
     companyId?: string;
     companyName?: string;
     subscriptionTier?: string;
@@ -32,15 +31,12 @@ interface AuthContextType extends AuthState {
 }
 
 // ============================================
-// Constants
+// Demo Users (PURE MOCK - No API calls)
 // ============================================
 
-const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true';
-
-// Demo users for fallback/testing
-const DEMO_USERS: Array<{ email: string; password: string; name: string }> = [
-    { email: 'demo@shyft.io', password: 'demo123', name: 'Demo User' },
-    { email: 'admin@shyft.io', password: 'admin123', name: 'Admin User' },
+const DEMO_USERS: Array<{ email: string; password: string; name: string; role: 'admin' | 'dispatcher' | 'technician' }> = [
+    { email: 'demo@shyft.io', password: 'demo123', name: 'Demo User', role: 'technician' },
+    { email: 'admin@shyft.io', password: 'admin123', name: 'Admin User', role: 'admin' },
 ];
 
 // ============================================
@@ -58,7 +54,7 @@ export const useAuth = (): AuthContextType => {
 };
 
 // ============================================
-// Provider Component
+// Provider Component (PURE MOCK)
 // ============================================
 
 interface AuthProviderProps {
@@ -72,20 +68,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: true,
     });
 
-    // Set up unauthorized handler
+    // Restore session from localStorage ONLY (no API calls)
     useEffect(() => {
-        api.setOnUnauthorized(() => {
-            setState({
-                user: null,
-                isAuthenticated: false,
-                isLoading: false,
-            });
-        });
-    }, []);
-
-    // Restore session on mount
-    useEffect(() => {
-        const restoreSession = async () => {
+        const restoreSession = () => {
             // Check for tokens in URL (cross-subdomain transfer)
             const urlParams = new URLSearchParams(window.location.search);
             const urlAccessToken = urlParams.get('access_token');
@@ -93,99 +78,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             if (urlAccessToken && urlRefreshToken) {
                 // Save tokens from URL and clean up the URL
-                api.setTokens(urlAccessToken, urlRefreshToken);
-                // Remove tokens from URL for security
+                localStorage.setItem('access_token', urlAccessToken);
+                localStorage.setItem('refresh_token', urlRefreshToken);
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
 
-            // Check if we have tokens
+            // Check for stored auth
+            const storedAuth = localStorage.getItem('shyft_auth');
             const hasToken = localStorage.getItem('access_token');
 
-            if (!hasToken) {
-                // Try legacy auth
-                const legacyAuth = localStorage.getItem('shyft_auth');
-                if (legacyAuth) {
-                    try {
-                        const user = JSON.parse(legacyAuth) as User;
-                        setState({
-                            user,
-                            isAuthenticated: true,
-                            isLoading: false,
-                        });
-                        return;
-                    } catch {
-                        localStorage.removeItem('shyft_auth');
-                    }
-                }
-                setState(prev => ({ ...prev, isLoading: false }));
-                return;
-            }
-
-            if (USE_REAL_API) {
+            if (storedAuth && hasToken) {
                 try {
-                    const { user: authUser, profile } = await api.getCurrentUser();
-                    if (authUser) {
-                        const user: User = {
-                            id: authUser.id,
-                            email: authUser.email,
-                            name: profile?.full_name || authUser.email,
-                            role: profile?.role,
-                            companyId: profile?.company_id,
-                            companyName: profile?.companies?.name,
-                            subscriptionTier: profile?.companies?.subscription_tier,
-                            createdAt: authUser.created_at,
-                        };
-                        setState({
-                            user,
-                            isAuthenticated: true,
-                            isLoading: false,
-                        });
-                        return;
-                    }
+                    const user = JSON.parse(storedAuth) as User;
+                    setState({
+                        user,
+                        isAuthenticated: true,
+                        isLoading: false,
+                    });
+                    return;
                 } catch {
-                    api.clearTokens();
+                    localStorage.removeItem('shyft_auth');
                 }
             }
 
-            setState(prev => ({ ...prev, isLoading: false }));
+            // No valid session
+            setState({ user: null, isAuthenticated: false, isLoading: false });
         };
 
         restoreSession();
     }, []);
 
     const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-        if (USE_REAL_API) {
-            try {
-                const { user: authUser } = await api.login(email, password);
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 300));
 
-                // Get full profile
-                const { user: fullUser, profile } = await api.getCurrentUser();
-
-                const user: User = {
-                    id: authUser?.id || fullUser?.id,
-                    email: authUser?.email || email,
-                    name: profile?.full_name || authUser?.email || email,
-                    role: profile?.role,
-                    companyId: profile?.company_id,
-                    companyName: profile?.companies?.name,
-                    subscriptionTier: profile?.companies?.subscription_tier,
-                    createdAt: authUser?.created_at || new Date().toISOString(),
-                };
-
-                setState({
-                    user,
-                    isAuthenticated: true,
-                    isLoading: false,
-                });
-
-                return { success: true };
-            } catch (err: any) {
-                return { success: false, error: err.error || 'Login failed' };
-            }
-        }
-
-        // Fallback to demo mode
-        await new Promise(resolve => setTimeout(resolve, 500));
         const foundUser = DEMO_USERS.find(
             u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
         );
@@ -198,76 +124,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             id: `user_${Date.now()}`,
             name: foundUser.name,
             email: foundUser.email,
+            role: foundUser.role,
             createdAt: new Date().toISOString(),
         };
 
+        // Store in localStorage
         localStorage.setItem('shyft_auth', JSON.stringify(user));
-        setState({ user, isAuthenticated: true, isLoading: false });
+        localStorage.setItem('access_token', 'demo_token');
+        localStorage.setItem('refresh_token', 'demo_refresh');
 
+        setState({ user, isAuthenticated: true, isLoading: false });
         return { success: true };
     }, []);
 
     const signup = useCallback(async (
         name: string,
         email: string,
-        password: string,
-        companyName?: string
+        _password: string,
+        _companyName?: string
     ): Promise<{ success: boolean; error?: string }> => {
-        if (USE_REAL_API) {
-            try {
-                const result = await api.signup(email, password, name, companyName || `${name}'s Company`);
-
-                if (result.session) {
-                    // Login successful, get user
-                    const { user: authUser, profile } = await api.getCurrentUser();
-
-                    const user: User = {
-                        id: authUser?.id,
-                        email: authUser?.email || email,
-                        name: profile?.full_name || name,
-                        role: profile?.role,
-                        companyId: profile?.company_id,
-                        companyName: profile?.companies?.name,
-                        subscriptionTier: profile?.companies?.subscription_tier,
-                        createdAt: authUser?.created_at || new Date().toISOString(),
-                    };
-
-                    setState({ user, isAuthenticated: true, isLoading: false });
-                }
-
-                return { success: true };
-            } catch (err: any) {
-                return { success: false, error: err.error || 'Signup failed' };
-            }
-        }
-
-        // Fallback demo mode
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         const user: User = {
             id: `user_${Date.now()}`,
             name,
             email,
+            role: 'admin', // New signups are admins of their company
             createdAt: new Date().toISOString(),
         };
 
         localStorage.setItem('shyft_auth', JSON.stringify(user));
-        setState({ user, isAuthenticated: true, isLoading: false });
+        localStorage.setItem('access_token', 'demo_token');
+        localStorage.setItem('refresh_token', 'demo_refresh');
 
+        setState({ user, isAuthenticated: true, isLoading: false });
         return { success: true };
     }, []);
 
     const logout = useCallback(() => {
-        if (USE_REAL_API) {
-            api.logout().catch(() => { });
-        }
-        api.clearTokens();
         localStorage.removeItem('shyft_auth');
-        setState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-        });
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setState({ user: null, isAuthenticated: false, isLoading: false });
     }, []);
 
     const updateUser = useCallback((updates: Partial<Pick<User, 'name' | 'email'>>) => {
@@ -280,38 +179,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, []);
 
     const refreshUser = useCallback(async () => {
-        if (!USE_REAL_API) return;
-
-        try {
-            const { user: authUser, profile } = await api.getCurrentUser();
-            if (authUser) {
-                const user: User = {
-                    id: authUser.id,
-                    email: authUser.email,
-                    name: profile?.full_name || authUser.email,
-                    role: profile?.role,
-                    companyId: profile?.company_id,
-                    companyName: profile?.companies?.name,
-                    subscriptionTier: profile?.companies?.subscription_tier,
-                    createdAt: authUser.created_at,
-                };
-                setState(prev => ({ ...prev, user }));
-            }
-        } catch {
-            // Ignore errors
-        }
+        // No-op in mock mode - user already loaded from localStorage
     }, []);
 
-    const value: AuthContextType = {
-        ...state,
-        login,
-        signup,
-        logout,
-        updateUser,
-        refreshUser,
-    };
-
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider
+            value={{
+                ...state,
+                login,
+                signup,
+                logout,
+                updateUser,
+                refreshUser,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
 export default AuthContext;

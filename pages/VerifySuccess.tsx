@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../src/context/AuthContext';
-import { getAppUrlWithAuth } from '../src/hooks/useSubdomain';
 
 const VerifySuccess: React.FC = () => {
     const navigate = useNavigate();
@@ -17,8 +16,8 @@ const VerifySuccess: React.FC = () => {
             setCountdown((prev) => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    // Redirect to app subdomain
-                    window.location.href = getAppUrlWithAuth();
+                    // Use SPA navigation instead of window.location
+                    navigate('/dashboard', { replace: true });
                     return 0;
                 }
                 return prev - 1;
@@ -26,7 +25,7 @@ const VerifySuccess: React.FC = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [navigate]);
 
     return (
         <div className="min-h-screen flex items-center justify-center px-6 bg-black relative overflow-hidden">
@@ -74,7 +73,7 @@ const VerifySuccess: React.FC = () => {
                 {/* Manual redirect button */}
                 <div className="mt-8">
                     <button
-                        onClick={() => window.location.href = getAppUrlWithAuth()}
+                        onClick={() => navigate('/dashboard', { replace: true })}
                         className="text-sm text-zinc-500 hover:text-white transition-colors underline underline-offset-4"
                     >
                         Skip and go to dashboard now
