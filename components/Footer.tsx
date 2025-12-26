@@ -21,25 +21,25 @@ const Footer: React.FC = () => {
             { label: 'Features', path: '/features' },
             { label: 'Pricing', path: '/pricing' },
             { label: 'Dashboard Demo', path: '/dashboard' },
-            { label: 'API Docs', external: true },
+            { label: 'API Docs', path: '/help', external: false },
         ],
         Company: [
             { label: 'About', path: '/about' },
-            { label: 'Careers', external: true },
-            { label: 'Blog', external: true },
-            { label: 'Press', external: true },
+            { label: 'Careers', comingSoon: true },
+            { label: 'Blog', comingSoon: true },
+            { label: 'Press', comingSoon: true },
         ],
         Resources: [
-            { label: 'Help Center', external: true },
+            { label: 'Help Center', path: '/help' },
             { label: 'Contact', path: '/contact' },
-            { label: 'Community', external: true },
-            { label: 'Status', external: true },
+            { label: 'Community', comingSoon: true },
+            { label: 'Status', comingSoon: true },
         ],
         Legal: [
             { label: 'Privacy', path: '/privacy' },
             { label: 'Terms', path: '/terms' },
-            { label: 'Security', external: true },
-            { label: 'Cookies', external: true },
+            { label: 'Security', comingSoon: true },
+            { label: 'Cookies', comingSoon: true },
         ],
     };
 
@@ -126,7 +126,14 @@ const Footer: React.FC = () => {
                             <ul className="space-y-3">
                                 {links.map((link) => (
                                     <li key={link.label}>
-                                        {link.external ? (
+                                        {'comingSoon' in link && link.comingSoon ? (
+                                            <span className="text-sm text-zinc-600 cursor-not-allowed flex items-center gap-1 group">
+                                                {link.label}
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800/50 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    Coming soon
+                                                </span>
+                                            </span>
+                                        ) : 'external' in link && link.external ? (
                                             <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-1">
                                                 {link.label}
                                                 <i className="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-50" />

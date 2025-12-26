@@ -10,6 +10,8 @@ interface AppState {
 
 interface AppContextType {
     state: AppState;
+    selectedPlan: string | null;
+    setSelectedPlan: (plan: string | null) => void;
     addJob: (job: Omit<Job, 'id'>) => void;
     updateJob: (id: number, updates: Partial<Job>) => void;
     deleteJob: (id: number) => void;
@@ -38,6 +40,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         team: mockTeam,
         stats: mockStats
     });
+
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
     // Job operations
     const addJob = (job: Omit<Job, 'id'>) => {
@@ -114,6 +118,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     const value: AppContextType = {
         state,
+        selectedPlan,
+        setSelectedPlan,
         addJob,
         updateJob,
         deleteJob,

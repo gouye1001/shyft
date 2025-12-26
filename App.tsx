@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Home from './pages/Home';
+import Product from './pages/Product';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import Login from './pages/Login';
@@ -75,6 +76,7 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public Pages with full layout */}
         <Route path="/" element={<Layout><Home /></Layout>} />
+        <Route path="/product" element={<Layout><Product /></Layout>} />
         <Route path="/features" element={<Layout><Features /></Layout>} />
         <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
         <Route path="/about" element={<Layout><About /></Layout>} />
