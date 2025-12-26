@@ -74,7 +74,7 @@ const Signup: React.FC<SignupProps> = ({ onShowToast }) => {
 
             if (result.success) {
                 onShowToast?.('success', 'Account created! Welcome to Shyft.');
-                setTimeout(() => navigate('/dashboard', { replace: true }), 500);
+                setTimeout(() => navigate('/verify-success', { replace: true, state: { type: 'signup' } }), 300);
             } else {
                 onShowToast?.('error', result.error || 'Signup failed');
                 setErrors({ email: result.error || 'Signup failed' });

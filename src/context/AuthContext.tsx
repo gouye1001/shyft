@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { api } from '../api';
 
 // ============================================
 // Types
@@ -9,6 +10,10 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    role?: string;
+    companyId?: string;
+    companyName?: string;
+    subscriptionTier?: string;
     createdAt: string;
 }
 
@@ -20,19 +25,19 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-    signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signup: (name: string, email: string, password: string, companyName?: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     updateUser: (updates: Partial<Pick<User, 'name' | 'email'>>) => void;
+    refreshUser: () => Promise<void>;
 }
 
 // ============================================
 // Constants
 // ============================================
 
-const AUTH_STORAGE_KEY = 'shyft_auth';
-const USERS_STORAGE_KEY = 'shyft_users';
+const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true';
 
-// Default demo users for testing
+// Demo users for fallback/testing
 const DEMO_USERS: Array<{ email: string; password: string; name: string }> = [
     { email: 'demo@shyft.io', password: 'demo123', name: 'Demo User' },
     { email: 'admin@shyft.io', password: 'admin123', name: 'Admin User' },
@@ -53,52 +58,6 @@ export const useAuth = (): AuthContextType => {
 };
 
 // ============================================
-// Helper Functions
-// ============================================
-
-interface StoredUser {
-    email: string;
-    password: string;
-    name: string;
-}
-
-const getStoredUsers = (): StoredUser[] => {
-    try {
-        const stored = localStorage.getItem(USERS_STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch {
-        // Invalid JSON, reset
-    }
-    // Initialize with demo users
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEMO_USERS));
-    return DEMO_USERS;
-};
-
-const saveUser = (user: StoredUser): void => {
-    const users = getStoredUsers();
-    const existingIndex = users.findIndex(u => u.email === user.email);
-    if (existingIndex >= 0) {
-        users[existingIndex] = user;
-    } else {
-        users.push(user);
-    }
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-};
-
-const generateUserId = (): string => {
-    return `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-};
-
-const createUserFromCredentials = (email: string, name: string): User => ({
-    id: generateUserId(),
-    name,
-    email,
-    createdAt: new Date().toISOString(),
-});
-
-// ============================================
 // Provider Component
 // ============================================
 
@@ -113,88 +72,197 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: true,
     });
 
-    // Restore session from localStorage on mount
+    // Set up unauthorized handler
     useEffect(() => {
-        const restoreSession = () => {
-            try {
-                const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-                if (stored) {
-                    const user = JSON.parse(stored) as User;
-                    setState({
-                        user,
-                        isAuthenticated: true,
-                        isLoading: false,
-                    });
-                    return;
-                }
-            } catch {
-                // Invalid stored data
-                localStorage.removeItem(AUTH_STORAGE_KEY);
+        api.setOnUnauthorized(() => {
+            setState({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+            });
+        });
+    }, []);
+
+    // Restore session on mount
+    useEffect(() => {
+        const restoreSession = async () => {
+            // Check for tokens in URL (cross-subdomain transfer)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlAccessToken = urlParams.get('access_token');
+            const urlRefreshToken = urlParams.get('refresh_token');
+
+            if (urlAccessToken && urlRefreshToken) {
+                // Save tokens from URL and clean up the URL
+                api.setTokens(urlAccessToken, urlRefreshToken);
+                // Remove tokens from URL for security
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
+
+            // Check if we have tokens
+            const hasToken = localStorage.getItem('access_token');
+
+            if (!hasToken) {
+                // Try legacy auth
+                const legacyAuth = localStorage.getItem('shyft_auth');
+                if (legacyAuth) {
+                    try {
+                        const user = JSON.parse(legacyAuth) as User;
+                        setState({
+                            user,
+                            isAuthenticated: true,
+                            isLoading: false,
+                        });
+                        return;
+                    } catch {
+                        localStorage.removeItem('shyft_auth');
+                    }
+                }
+                setState(prev => ({ ...prev, isLoading: false }));
+                return;
+            }
+
+            if (USE_REAL_API) {
+                try {
+                    const { user: authUser, profile } = await api.getCurrentUser();
+                    if (authUser) {
+                        const user: User = {
+                            id: authUser.id,
+                            email: authUser.email,
+                            name: profile?.full_name || authUser.email,
+                            role: profile?.role,
+                            companyId: profile?.company_id,
+                            companyName: profile?.companies?.name,
+                            subscriptionTier: profile?.companies?.subscription_tier,
+                            createdAt: authUser.created_at,
+                        };
+                        setState({
+                            user,
+                            isAuthenticated: true,
+                            isLoading: false,
+                        });
+                        return;
+                    }
+                } catch {
+                    api.clearTokens();
+                }
+            }
+
             setState(prev => ({ ...prev, isLoading: false }));
         };
 
-        // Small delay to simulate loading
-        const timer = setTimeout(restoreSession, 100);
-        return () => clearTimeout(timer);
+        restoreSession();
     }, []);
 
     const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        if (USE_REAL_API) {
+            try {
+                const { user: authUser } = await api.login(email, password);
 
-        const users = getStoredUsers();
-        const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+                // Get full profile
+                const { user: fullUser, profile } = await api.getCurrentUser();
+
+                const user: User = {
+                    id: authUser?.id || fullUser?.id,
+                    email: authUser?.email || email,
+                    name: profile?.full_name || authUser?.email || email,
+                    role: profile?.role,
+                    companyId: profile?.company_id,
+                    companyName: profile?.companies?.name,
+                    subscriptionTier: profile?.companies?.subscription_tier,
+                    createdAt: authUser?.created_at || new Date().toISOString(),
+                };
+
+                setState({
+                    user,
+                    isAuthenticated: true,
+                    isLoading: false,
+                });
+
+                return { success: true };
+            } catch (err: any) {
+                return { success: false, error: err.error || 'Login failed' };
+            }
+        }
+
+        // Fallback to demo mode
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const foundUser = DEMO_USERS.find(
+            u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+        );
 
         if (!foundUser) {
             return { success: false, error: 'Invalid email or password' };
         }
 
-        const user = createUserFromCredentials(foundUser.email, foundUser.name);
+        const user: User = {
+            id: `user_${Date.now()}`,
+            name: foundUser.name,
+            email: foundUser.email,
+            createdAt: new Date().toISOString(),
+        };
 
-        // Save to localStorage
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-
-        setState({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-        });
+        localStorage.setItem('shyft_auth', JSON.stringify(user));
+        setState({ user, isAuthenticated: true, isLoading: false });
 
         return { success: true };
     }, []);
 
-    const signup = useCallback(async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+    const signup = useCallback(async (
+        name: string,
+        email: string,
+        password: string,
+        companyName?: string
+    ): Promise<{ success: boolean; error?: string }> => {
+        if (USE_REAL_API) {
+            try {
+                const result = await api.signup(email, password, name, companyName || `${name}'s Company`);
 
-        const users = getStoredUsers();
-        const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+                if (result.session) {
+                    // Login successful, get user
+                    const { user: authUser, profile } = await api.getCurrentUser();
 
-        if (existingUser) {
-            return { success: false, error: 'An account with this email already exists' };
+                    const user: User = {
+                        id: authUser?.id,
+                        email: authUser?.email || email,
+                        name: profile?.full_name || name,
+                        role: profile?.role,
+                        companyId: profile?.company_id,
+                        companyName: profile?.companies?.name,
+                        subscriptionTier: profile?.companies?.subscription_tier,
+                        createdAt: authUser?.created_at || new Date().toISOString(),
+                    };
+
+                    setState({ user, isAuthenticated: true, isLoading: false });
+                }
+
+                return { success: true };
+            } catch (err: any) {
+                return { success: false, error: err.error || 'Signup failed' };
+            }
         }
 
-        // Create new user
-        const user = createUserFromCredentials(email, name);
+        // Fallback demo mode
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Save user credentials
-        saveUser({ email, password, name });
+        const user: User = {
+            id: `user_${Date.now()}`,
+            name,
+            email,
+            createdAt: new Date().toISOString(),
+        };
 
-        // Save session
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-
-        setState({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-        });
+        localStorage.setItem('shyft_auth', JSON.stringify(user));
+        setState({ user, isAuthenticated: true, isLoading: false });
 
         return { success: true };
     }, []);
 
     const logout = useCallback(() => {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
+        if (USE_REAL_API) {
+            api.logout().catch(() => { });
+        }
+        api.clearTokens();
+        localStorage.removeItem('shyft_auth');
         setState({
             user: null,
             isAuthenticated: false,
@@ -205,26 +273,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const updateUser = useCallback((updates: Partial<Pick<User, 'name' | 'email'>>) => {
         setState(prev => {
             if (!prev.user) return prev;
-
             const updatedUser = { ...prev.user, ...updates };
-            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
-
-            // Also update stored credentials if email changed
-            if (updates.email || updates.name) {
-                const users = getStoredUsers();
-                const userIdx = users.findIndex(u => u.email === prev.user!.email);
-                if (userIdx >= 0) {
-                    users[userIdx] = {
-                        ...users[userIdx],
-                        email: updates.email || users[userIdx].email,
-                        name: updates.name || users[userIdx].name,
-                    };
-                    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-                }
-            }
-
+            localStorage.setItem('shyft_auth', JSON.stringify(updatedUser));
             return { ...prev, user: updatedUser };
         });
+    }, []);
+
+    const refreshUser = useCallback(async () => {
+        if (!USE_REAL_API) return;
+
+        try {
+            const { user: authUser, profile } = await api.getCurrentUser();
+            if (authUser) {
+                const user: User = {
+                    id: authUser.id,
+                    email: authUser.email,
+                    name: profile?.full_name || authUser.email,
+                    role: profile?.role,
+                    companyId: profile?.company_id,
+                    companyName: profile?.companies?.name,
+                    subscriptionTier: profile?.companies?.subscription_tier,
+                    createdAt: authUser.created_at,
+                };
+                setState(prev => ({ ...prev, user }));
+            }
+        } catch {
+            // Ignore errors
+        }
     }, []);
 
     const value: AuthContextType = {
@@ -233,6 +308,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         signup,
         logout,
         updateUser,
+        refreshUser,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

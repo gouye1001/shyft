@@ -1,32 +1,15 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 
-// Layout Components
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute';
-
-// Pages
-import Home from './pages/Home';
-import Product from './pages/Product';
-import Features from './pages/Features';
-import Pricing from './pages/Pricing';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import ForgotPassword from './pages/ForgotPassword';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Enterprise from './pages/Enterprise';
-import Help from './pages/Help';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import NotFound from './pages/NotFound';
+// Apps
+import MarketingApp from './MarketingApp';
+import AuthenticatedApp from './AuthenticatedApp';
 
 // Context & Utils
 import { ToastContainer, useToast } from './components/Toast';
 import { AppProvider } from './src/context/AppContext';
 import { AuthProvider } from './src/context/AuthContext';
+import useSubdomain from './src/hooks/useSubdomain';
 
 // ============================================
 // Scroll to Top Component
@@ -43,71 +26,18 @@ const ScrollToTop: React.FC = () => {
 };
 
 // ============================================
-// Layout Component
+// App Router - Switches between Marketing and App
 // ============================================
 
-interface LayoutProps {
-  children: React.ReactNode;
-  hideNavbar?: boolean;
-  hideFooter?: boolean;
-}
+const AppRouter: React.FC = () => {
+  const subdomain = useSubdomain();
 
-const Layout: React.FC<LayoutProps> = ({ children, hideNavbar, hideFooter }) => {
-  return (
-    <>
-      {!hideNavbar && <Navbar />}
-      <main className="flex-grow">{children}</main>
-      {!hideFooter && <Footer />}
-    </>
-  );
-};
+  // Render appropriate app based on subdomain
+  if (subdomain === 'app') {
+    return <AuthenticatedApp />;
+  }
 
-// ============================================
-// App Routes Component
-// ============================================
-
-const AppRoutes: React.FC = () => {
-  const toast = useToast();
-
-  return (
-    <>
-      <ScrollToTop />
-
-      <Routes>
-        {/* Public Pages with full layout */}
-        <Route path="/" element={<Layout><Home /></Layout>} />
-        <Route path="/product" element={<Layout><Product /></Layout>} />
-        <Route path="/features" element={<Layout><Features /></Layout>} />
-        <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
-        <Route path="/about" element={<Layout><About /></Layout>} />
-        <Route path="/contact" element={<Layout><Contact onShowToast={toast.addToast} /></Layout>} />
-        <Route path="/enterprise" element={<Layout><Enterprise onShowToast={toast.addToast} /></Layout>} />
-        <Route path="/help" element={<Layout><Help /></Layout>} />
-        <Route path="/terms" element={<Layout><Terms /></Layout>} />
-        <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
-
-        {/* Auth Pages - no footer */}
-        <Route path="/login" element={<Layout hideFooter><Login onShowToast={toast.addToast} /></Layout>} />
-        <Route path="/signup" element={<Layout hideFooter><Signup onShowToast={toast.addToast} /></Layout>} />
-        <Route path="/forgot-password" element={<Layout hideFooter><ForgotPassword onShowToast={toast.addToast} /></Layout>} />
-
-        {/* Protected Pages - no navbar/footer */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Layout hideNavbar hideFooter>
-                <Dashboard />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 404 */}
-        <Route path="*" element={<Layout><NotFound /></Layout>} />
-      </Routes>
-    </>
-  );
+  return <MarketingApp />;
 };
 
 // ============================================
@@ -125,8 +55,11 @@ export default function App() {
             {/* Toast Notifications */}
             <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
 
-            {/* Routes */}
-            <AppRoutes />
+            {/* Scroll to top on route change */}
+            <ScrollToTop />
+
+            {/* Main Router */}
+            <AppRouter />
           </div>
         </AppProvider>
       </AuthProvider>

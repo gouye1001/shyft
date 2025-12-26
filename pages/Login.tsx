@@ -63,8 +63,8 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
             const result = await login(email, password);
 
             if (result.success) {
-                onShowToast?.('success', 'Welcome back! Redirecting to dashboard...');
-                setTimeout(() => navigate(from, { replace: true }), 500);
+                onShowToast?.('success', 'Welcome back! Redirecting...');
+                setTimeout(() => navigate('/verify-success', { replace: true, state: { type: 'login' } }), 300);
             } else {
                 onShowToast?.('error', result.error || 'Login failed');
                 setErrors({ password: result.error });

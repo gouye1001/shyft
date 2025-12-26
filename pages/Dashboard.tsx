@@ -3,12 +3,16 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AnimatedCounter } from '../components/GradientText';
 import { mockJobs, mockTeam, mockStats } from '../src/utils/mockData';
 import { useAuth } from '../src/context/AuthContext';
+import OnboardingGuide from '../components/OnboardingGuide';
+
+const ONBOARDING_STORAGE_KEY = 'shyft_onboarding_completed';
 
 const Dashboard: React.FC = () => {
     const [selectedJob, setSelectedJob] = useState<number | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [sidebarTab, setSidebarTab] = useState<'jobs' | 'team'>('jobs');
     const [showSettings, setShowSettings] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const navigate = useNavigate();
@@ -32,6 +36,26 @@ const Dashboard: React.FC = () => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Check if user needs onboarding
+    useEffect(() => {
+        const hasCompletedOnboarding = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+        if (!hasCompletedOnboarding) {
+            // Delay showing onboarding to let page load
+            const timer = setTimeout(() => setShowOnboarding(true), 500);
+            return () => clearTimeout(timer);
+        }
+    }, []);
+
+    const handleOnboardingComplete = () => {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+        setShowOnboarding(false);
+    };
+
+    const handleOnboardingDismiss = () => {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+        setShowOnboarding(false);
+    };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -71,20 +95,43 @@ const Dashboard: React.FC = () => {
                 <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[150px]" />
             </div>
 
-            {/* Demo Banner */}
-            <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 border-y border-white/5 py-2 px-6 text-center backdrop-blur-md relative z-20">
-                <span className="text-xs md:text-sm text-zinc-300 flex items-center justify-center gap-2">
-                    <i className="fa-solid fa-sparkles text-amber-400" />
-                    Logged in as {user?.name || 'User'}
-                    <span className="mx-2 w-px h-4 bg-white/10" />
-                    <button
-                        onClick={handleLogout}
-                        className="text-red-400 hover:text-red-300 font-medium transition-colors"
+            {/* Top Bar with Navigation */}
+            <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 border-y border-white/5 py-2 px-6 backdrop-blur-md relative z-20">
+                <div className="flex items-center justify-between">
+                    {/* Left: Back to Home */}
+                    <Link
+                        to="/"
+                        className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm"
                     >
-                        <i className="fa-solid fa-right-from-bracket mr-1" />
-                        Logout
-                    </button>
-                </span>
+                        <i className="fa-solid fa-arrow-left text-xs" />
+                        <span>Home</span>
+                    </Link>
+
+                    {/* Center: User Info */}
+                    <span className="text-xs md:text-sm text-zinc-300 flex items-center gap-2">
+                        <i className="fa-solid fa-sparkles text-amber-400" />
+                        Logged in as {user?.name || 'User'}
+                    </span>
+
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowOnboarding(true)}
+                            className="text-zinc-400 hover:text-white transition-colors text-sm flex items-center gap-1.5"
+                        >
+                            <i className="fa-solid fa-circle-question text-xs" />
+                            <span className="hidden sm:inline">Help</span>
+                        </button>
+                        <span className="w-px h-4 bg-white/10" />
+                        <button
+                            onClick={handleLogout}
+                            className="text-red-400 hover:text-red-300 font-medium transition-colors text-sm flex items-center gap-1.5"
+                        >
+                            <i className="fa-solid fa-right-from-bracket text-xs" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="flex flex-1 overflow-hidden relative z-10">
@@ -421,6 +468,15 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Onboarding Guide */}
+            {showOnboarding && (
+                <OnboardingGuide
+                    userName={user?.name || 'there'}
+                    onComplete={handleOnboardingComplete}
+                    onDismiss={handleOnboardingDismiss}
+                />
             )}
         </div>
     );

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 import { useAuth } from '../src/context/AuthContext';
+import FloatingDashboardWidget from '../components/FloatingDashboardWidget';
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -50,7 +51,7 @@ const Home: React.FC = () => {
                                     onClick={handleGetStarted}
                                     className="group h-14 px-8 rounded-full bg-white text-black font-semibold text-base hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg shadow-white/10 flex items-center justify-center gap-2"
                                 >
-                                    Start building for free
+                                    {isAuthenticated ? 'Go to Dashboard' : 'Start building for free'}
                                     <i className="fa-solid fa-arrow-right text-sm group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                                 <button
@@ -662,7 +663,7 @@ const Home: React.FC = () => {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <button onClick={handleGetStarted} className="group h-16 px-10 rounded-full bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg shadow-white/10 flex items-center justify-center gap-2">
-                                Get started free
+                                {isAuthenticated ? 'Go to Dashboard' : 'Get started free'}
                                 <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button onClick={() => navigate('/contact')} className="h-16 px-10 rounded-full border border-white/10 text-white font-semibold text-lg hover:bg-white/5 transition-colors">
@@ -675,6 +676,9 @@ const Home: React.FC = () => {
                     </ScrollReveal>
                 </div>
             </section>
+
+            {/* Floating Dashboard Widget for logged-in users */}
+            <FloatingDashboardWidget />
         </div>
     );
 };

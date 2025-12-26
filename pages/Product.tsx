@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 import MagneticButton from '../components/MagneticButton';
 import { useAuth } from '../src/context/AuthContext';
+import FloatingDashboardWidget from '../components/FloatingDashboardWidget';
 
 const Product: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ const Product: React.FC = () => {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <MagneticButton variant="primary" size="lg" onClick={handleTryNow}>
-                                <span className="font-semibold">Try it now</span>
+                                <span className="font-semibold">{isAuthenticated ? 'Go to Dashboard' : 'Try it now'}</span>
                                 <i className="fa-solid fa-arrow-right text-sm ml-2" />
                             </MagneticButton>
                             <MagneticButton variant="secondary" size="lg" onClick={() => navigate('/pricing')}>
@@ -257,7 +258,7 @@ const Product: React.FC = () => {
                                 onClick={handleTryNow}
                                 className="px-8 py-4 rounded-full bg-white text-black font-bold hover:bg-zinc-200 transition-all shadow-lg shadow-white/20"
                             >
-                                Start free trial
+                                {isAuthenticated ? 'Go to Dashboard' : 'Start free trial'}
                                 <i className="fa-solid fa-arrow-right ml-2" />
                             </button>
                             <button
@@ -270,6 +271,9 @@ const Product: React.FC = () => {
                     </div>
                 </ScrollReveal>
             </div>
+
+            {/* Floating Dashboard Widget */}
+            <FloatingDashboardWidget />
         </div>
     );
 };

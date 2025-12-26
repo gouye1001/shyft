@@ -14,7 +14,7 @@ interface NavLink {
 
 const navLinks: NavLink[] = [
   { label: 'Product', path: '/product' },
-  { label: 'Solutions', path: '/about' },
+  { label: 'Solutions', path: '/solutions' },
   { label: 'Pricing', path: '/pricing' },
   { label: 'Enterprise', path: '/enterprise' },
 ];
@@ -102,9 +102,17 @@ const Navbar: React.FC = () => {
             <div className="hidden md:flex items-center gap-2">
               {isAuthenticated ? (
                 <>
-                  <span className="text-zinc-400 text-sm mr-2">
-                    Hi, {user?.name?.split(' ')[0]}
-                  </span>
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {(user?.name?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
+                    </div>
+                    <span className="text-zinc-300 text-sm max-w-[100px] truncate">
+                      {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}
+                    </span>
+                  </Link>
                   <Link
                     to="/dashboard"
                     className="nav-cta bg-white text-black font-semibold rounded-full hover:bg-zinc-100 transition-colors whitespace-nowrap"

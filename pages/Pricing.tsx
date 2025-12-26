@@ -2,12 +2,19 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 import { useAuth } from '../src/context/AuthContext';
+import { usePricing, useSubscription } from '../src/hooks';
+import FloatingDashboardWidget from '../components/FloatingDashboardWidget';
+
+const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true';
 
 const Pricing: React.FC = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+    const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+    const { data: pricing } = usePricing();
+    const { startCheckout } = useSubscription();
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -195,22 +202,39 @@ const Pricing: React.FC = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => {
+                                    disabled={checkoutLoading === plan.name}
+                                    onClick={async () => {
                                         if (plan.name === 'Enterprise') {
                                             navigate('/enterprise');
+                                        } else if (plan.name === 'Starter' && plan.price === 0) {
+                                            // Free tier - just go to signup/dashboard
+                                            navigate(isAuthenticated ? '/dashboard' : '/signup');
+                                        } else if (USE_REAL_API && isAuthenticated && pricing?.priceIds) {
+                                            // Paid tier with real API - start Stripe checkout
+                                            setCheckoutLoading(plan.name);
+                                            const priceId = plan.name === 'Pro'
+                                                ? pricing.priceIds.professional
+                                                : pricing.priceIds.starter;
+                                            await startCheckout(priceId);
+                                            setCheckoutLoading(null);
                                         } else {
-                                            // If authenticated, go to dashboard, otherwise signup
+                                            // Demo mode or not authenticated
                                             navigate(isAuthenticated ? '/dashboard' : '/signup');
                                         }
                                     }}
                                     className={`
                                     w-full py-4 rounded-xl font-bold transition-all text-sm uppercase tracking-wide
                                     ${plan.popular
-                                            ? 'bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/20 hover:-translate-y-1'
-                                            : 'bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black hover:-translate-y-1'
+                                            ? 'bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/20 hover:-translate-y-1 disabled:opacity-50'
+                                            : 'bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black hover:-translate-y-1 disabled:opacity-50'
                                         }
                                 `}>
-                                    {plan.cta}
+                                    {checkoutLoading === plan.name ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <i className="fa-solid fa-spinner fa-spin" />
+                                            Processing...
+                                        </span>
+                                    ) : plan.cta}
                                 </button>
                             </div>
                         </ScrollReveal>
@@ -298,6 +322,9 @@ const Pricing: React.FC = () => {
                     </div>
                 </ScrollReveal>
             </div>
+
+            {/* Floating Dashboard Widget */}
+            <FloatingDashboardWidget />
         </div>
     );
 };
