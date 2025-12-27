@@ -32,3 +32,6 @@ api/.dev.vars
 .env
 .env.*
 !.env.example
+
+# Agents Workflows
+.agent

@@ -106,6 +106,12 @@ let _invoices: Invoice[] = [];
 let _notifications: Notification[] = [];
 let _audit: AuditEvent[] = [];
 
+// Cached computed data (invalidated on changes)
+let _cachedDashboardStats: ReturnType<typeof computeDashboardStats> | null = null;
+let _cachedCustomerStats: ReturnType<typeof computeCustomerStats> | null = null;
+let _cachedRecentJobs: { limit: number; data: Job[] } | null = null;
+let _cachedTechnicians: TeamMember[] | null = null;
+
 // ========================================
 // Subscription System
 // ========================================
@@ -124,6 +130,19 @@ export function subscribe(key: DataKey, listener: Listener): () => void {
 }
 
 function notifyListeners(key: DataKey): void {
+    // Invalidate caches when data changes
+    if (key === 'all' || key === 'jobs' || key === 'invoices' || key === 'team') {
+        _cachedDashboardStats = null;
+    }
+    if (key === 'all' || key === 'customers' || key === 'jobs') {
+        _cachedCustomerStats = null;
+    }
+    if (key === 'all' || key === 'jobs') {
+        _cachedRecentJobs = null;
+    }
+    if (key === 'all' || key === 'team') {
+        _cachedTechnicians = null;
+    }
     listeners.get(key)?.forEach(listener => listener());
     listeners.get('all')?.forEach(listener => listener());
 }
@@ -236,7 +255,10 @@ export function getTeamMembers(): TeamMember[] {
 }
 
 export function getTechnicians(): TeamMember[] {
-    return _team.filter(t => t.role === 'technician' && t.status === 'active');
+    if (!_cachedTechnicians) {
+        _cachedTechnicians = _team.filter(t => t.role === 'technician' && t.status === 'active');
+    }
+    return _cachedTechnicians;
 }
 
 export function getInvoices(): Invoice[] {
@@ -435,11 +457,8 @@ export function deleteNotification(id: string): void {
     notifyListeners('notifications');
 }
 
-// ========================================
-// Dashboard Stats (computed, but stable when data stable)
-// ========================================
-
-export function getDashboardStats() {
+// Actual computation functions (internal)
+function computeDashboardStats() {
     const completedJobs = _jobs.filter(j => j.status === 'completed');
     const activeJobs = _jobs.filter(j => j.status === 'in-progress' || j.status === 'scheduled');
     const totalRevenue = completedJobs.reduce((sum, j) => sum + j.amount, 0);
@@ -466,13 +485,7 @@ export function getDashboardStats() {
     };
 }
 
-export function getRecentJobs(limit: number = 5): Job[] {
-    return [..._jobs]
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, limit);
-}
-
-export function getCustomerStats() {
+function computeCustomerStats() {
     return _customers.map(customer => {
         const customerJobs = _jobs.filter(j => j.customerId === customer.id);
         const completedJobs = customerJobs.filter(j => j.status === 'completed');
@@ -486,6 +499,33 @@ export function getCustomerStats() {
                 : null,
         };
     });
+}
+
+// Public getters with caching for useSyncExternalStore compatibility
+export function getDashboardStats() {
+    if (!_cachedDashboardStats) {
+        _cachedDashboardStats = computeDashboardStats();
+    }
+    return _cachedDashboardStats;
+}
+
+export function getRecentJobs(limit: number = 5): Job[] {
+    if (!_cachedRecentJobs || _cachedRecentJobs.limit !== limit) {
+        _cachedRecentJobs = {
+            limit,
+            data: [..._jobs]
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(0, limit)
+        };
+    }
+    return _cachedRecentJobs.data;
+}
+
+export function getCustomerStats() {
+    if (!_cachedCustomerStats) {
+        _cachedCustomerStats = computeCustomerStats();
+    }
+    return _cachedCustomerStats;
 }
 
 // Initialize on import

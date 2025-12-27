@@ -3,38 +3,39 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, Outlet } from 'rea
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Components
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import LoadingScreen from '../components/LoadingScreen';
-import ProtectedRoute from '../components/ProtectedRoute';
-import AppLayout from '../components/app/AppLayout';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import LoadingScreen from './components/LoadingScreen';
+import ProtectedRoute from './components/ProtectedRoute';
+import AppLayout from './components/app/AppLayout';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Public Pages
-import Home from '../pages/Home';
-import Features from '../pages/Features';
-import Solutions from '../pages/Solutions';
-import Pricing from '../pages/Pricing';
-import Enterprise from '../pages/Enterprise';
-import About from '../pages/About';
-import Contact from '../pages/Contact';
-import Login from '../pages/Login';
-import Signup from '../pages/Signup';
-import ForgotPassword from '../pages/ForgotPassword';
-import Terms from '../pages/Terms';
-import Privacy from '../pages/Privacy';
-import Help from '../pages/Help';
-import NotFound from '../pages/NotFound';
+import Home from './pages/Home';
+import Features from './pages/Features';
+import Solutions from './pages/Solutions';
+import Pricing from './pages/Pricing';
+import Enterprise from './pages/Enterprise';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Help from './pages/Help';
+import NotFound from './pages/NotFound';
 
 // App Pages
-import AppDashboard from '../pages/app/Dashboard';
-import AppJobs from '../pages/app/Jobs';
-import AppSchedule from '../pages/app/Schedule';
-import AppCustomers from '../pages/app/Customers';
-import AppInvoices from '../pages/app/Invoices';
-import AppTeam from '../pages/app/Team';
-import AppSettings from '../pages/app/Settings';
-import AppNotifications from '../pages/app/Notifications';
-import AppAnalytics from '../pages/app/Analytics';
+import AppDashboard from './pages/app/Dashboard';
+import AppJobs from './pages/app/Jobs';
+import AppSchedule from './pages/app/Schedule';
+import AppCustomers from './pages/app/Customers';
+import AppInvoices from './pages/app/Invoices';
+import AppTeam from './pages/app/Team';
+import AppSettings from './pages/app/Settings';
+import AppNotifications from './pages/app/Notifications';
+import AppAnalytics from './pages/app/Analytics';
 
 // ============================================
 // Scroll To Top Component
@@ -139,11 +140,13 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => {
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <AppRoutes />
-            </AuthProvider>
-        </BrowserRouter>
+        <ErrorBoundary>
+            <BrowserRouter>
+                <AuthProvider>
+                    <AppRoutes />
+                </AuthProvider>
+            </BrowserRouter>
+        </ErrorBoundary>
     );
 };
 

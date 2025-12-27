@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../types/env';
 import { createSupabaseClient } from '../lib/supabase';
-import type { Tables, InsertDto, UpdateDto } from '../types/database';
+import type { InsertDto, UpdateDto } from '../types/database';
 
 const jobs = new Hono<{ Bindings: Env }>();
 
